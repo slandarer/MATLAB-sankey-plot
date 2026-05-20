@@ -1,4 +1,4 @@
-% sankey demo4
+% sankey demo4 : Examples of inflow not equaling outflow, and cross‑level flow examples.
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

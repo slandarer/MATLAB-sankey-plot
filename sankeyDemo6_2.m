@@ -1,4 +1,4 @@
-% sankey demo6_2
+% sankey demo6_2 : chord diagram
 % Flowing towards itself
 % -----------------------
 % @author : slandarer

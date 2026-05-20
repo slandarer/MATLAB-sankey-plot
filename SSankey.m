@@ -1,9 +1,41 @@
 classdef SSankey < handle
-% Copyright (c) 2023-2025, Zhaoxu Liu / slandarer
+% Copyright (c) 2023-2026, Zhaoxu Liu / slandarer
 % =========================================================================
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+% Zhaoxu Liu / slandarer (2026). sankey plot 
+% (https://www.mathworks.com/matlabcentral/fileexchange/128679-sankey-plot), 
+% MATLAB Central File Exchange. Retrieved May 19, 2026.
+% =========================================================================
+% % Basic usage
+%
+%     links = {'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
+%         'b1','B',.4; 'b2','B',1;'b3','B',1; 'c1','C',1;
+%         'c2','C',1;  'c3','C',1;'A','AA',2; 'A','BB',1.2;
+%         'B','BB',1.5; 'B','AA',1.5; 'C','BB',2.3; 'C','AA',1.2};
+% 
+%     % Create a Sankey diagram object
+%     % 创建桑基图对象
+%     SK=SSankey(links(:,1), links(:,2), links(:,3));
+% 
+%     % Start drawing
+%     % 开始绘图
+%     SK.draw()
+% 
+% % Basic usage - AdjMat
+% 
+%     % Define inter-layer adjacency matrices
+%     % 定义层间邻接矩阵
+%     A12 = [1,2,1; 1,2,3; 2,0,1];
+%     A23 = [1,4; 2,1; 0,3];
+%     A34 = [1,5; 2,3];
+% 
+%     % Assemble global block matrix (main diagonal = zero, super-diagonal = A12, A23, A34)
+%     % 组装全局分块矩阵（主对角线为零，上对角线为 A12, A23, A34）
+%     adjMat = mergeAdjMat({A12, A23, A34});
+% 
+%     SK = SSankey([],[],[], 'AdjMat',adjMat);
+%     SK.draw()
+
+
 % =========================================================================
 % # update 2.0.0(2024-02-04)
 % see natureSankeyDemo1.m

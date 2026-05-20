@@ -1,4 +1,4 @@
-% sankey demo6
+% sankey demo6 : chord diagram
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

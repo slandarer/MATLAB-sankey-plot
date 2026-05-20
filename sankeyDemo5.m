@@ -1,4 +1,4 @@
-% sankey demo5
+% sankey demo5 : Set block/link/label
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

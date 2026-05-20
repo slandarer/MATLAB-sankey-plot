@@ -1,4 +1,4 @@
-% sankey demo3
+% sankey demo3 : Set color
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

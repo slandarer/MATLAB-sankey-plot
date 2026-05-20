@@ -1,4 +1,4 @@
-% sankey demo1
+% sankey demo1 : Basic usage
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

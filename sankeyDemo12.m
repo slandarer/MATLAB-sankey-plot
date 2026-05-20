@@ -1,4 +1,4 @@
-% sankey demo12
+% sankey demo12 : Show values for links.
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

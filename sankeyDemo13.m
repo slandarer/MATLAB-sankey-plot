@@ -1,4 +1,4 @@
-% sankey demo13
+% sankey demo13 : Set link label format
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔
@@ -25,7 +25,7 @@ SK.Sep=.1;
 % 'none'(default)/'left'/'right'/'center'
 SK.ValueLabelLocation='left';
 
-% 修改链接文本格式(Set link label location)
+% 修改链接文本格式(Set link label format)
 SK.ValueLabelFormat=@(X) ['V:',num2str(X)];
 
 % 开始绘图(Start drawing)

@@ -1,4 +1,4 @@
-% sankey demo9
+% sankey demo9 : Using an adjacency matrix as input.
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔

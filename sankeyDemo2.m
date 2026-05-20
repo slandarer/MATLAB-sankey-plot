@@ -1,4 +1,4 @@
-% sankey demo2
+% sankey demo2 : Block scale
 % -----------------------
 % @author : slandarer
 % 公众号  : slandarer随笔
