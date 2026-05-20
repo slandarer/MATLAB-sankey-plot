@@ -18,7 +18,7 @@ for k = 1:n-1
     [~, col] = size(layerAdj{k});
     [row, ~] = size(layerAdj{k + 1});
     if col ~= row
-        error('Dimension mismatch: A%d has %d columns, but A%d has %d rows.', k, col, k+1, row);
+        error('Dimension mismatch: A%d%d has %d columns, but A%d%d has %d rows.', k, k+1, col, k+1, k+2, row);
     end
 end
 blkSize = zeros(n + 1, 2);
