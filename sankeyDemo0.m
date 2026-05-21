@@ -28,8 +28,6 @@ SK1.Layer = [1, 1, 1, 2, 2, 2, 3, 3, 3];
 SK1.draw()
 
 
-
-
 %% Basic usage - adjMat
 figure()
 % 定义层间邻接矩阵(Define inter-layer adjacency matrices)

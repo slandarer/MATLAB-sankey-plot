@@ -32,7 +32,7 @@ SK=SSankey(links(:,1),links(:,2),links(:,3));
 % 开始绘图(Start drawing)
 SK.draw()
 ```
-![](gallery\demo0.png)
+![](gallery/demo0.png)
 
 ### Basic usage - adjMat
 ```matlab
@@ -49,7 +49,7 @@ adjMat = mergeAdjMat({A12, A23, A34});
 SK = SSankey([],[],[], 'AdjMat',adjMat);
 SK.draw()
 ```
-![](gallery\demo16.png)
+![](gallery/demo16.png)
 
 ### Add nodes
 ```matlab
@@ -80,7 +80,7 @@ SK.addNode()
 SK.draw()
 SK.addNode('Add3',5)
 ```
-![](gallery\demo14.png)
+![](gallery/demo14.png)
 
 ### Add links
 ```matlab
@@ -115,6 +115,6 @@ SK.addLink(11,12,3)
 SK.addLink(10,13,3)
 SK.addLink(12,13,6)
 ```
-![](gallery\demo15.png)
+![](gallery/demo15.png)
 
 ### See demos for more examples.
