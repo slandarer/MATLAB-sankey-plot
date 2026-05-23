@@ -1,16 +1,15 @@
 classdef biChordChart < handle
-% Copyright (c) 2022-2025, Zhaoxu Liu / slandarer
+% Copyright (c) 2022-2026, Zhaoxu Liu / slandarer
 % =========================================================================
 % @author : slandarer
 % 公众号  : slandarer随笔
 % 知乎    : slandarer
 % -------------------------------------------------------------------------
-% Zhaoxu Liu / slandarer (2024). Digraph chord chart 有向弦图 
-% (https://www.mathworks.com/matlabcentral/fileexchange/121043-digraph-chord-chart), 
-% MATLAB Central File Exchange. 检索来源 2024/3/31.
-%
+% Zhaoxu Liu / slandarer (2026). biChordChart (bidirectional chord diagram | 有向弦图) 
+% (https://www.mathworks.com/matlabcentral/fileexchange/121043-bichordchart-bidirectional-chord-diagram), 
+% MATLAB Central File Exchange. Retrieved April 14, 2026.
 % =========================================================================
-% 使用示例(demo)：
+% 使用示例(Basic usage)：
 % -------------------------------------------------------------------------
 % dataMat = randi([0,8], [6,6]);
 % 
@@ -22,9 +21,8 @@ classdef biChordChart < handle
 % 
 % % 修改字体，字号及颜色
 % BCC.setFont('FontName','Cambria', 'FontSize',17)
-
 % =========================================================================
-% 版本更新(version update)：
+% 版本更新(Version update)：
 % -------------------------------------------------------------------------
 % # version 1.1.0
 % + 增添了可调节标签半径的属性'LRadius'
@@ -69,6 +67,15 @@ classdef biChordChart < handle
 %   当`Rotation`为数组时，可设置每一个弧形块所处角度
 %   When `Rotation` is an array, it allows the setting of the angle for
 %   each arc-shaped blocks(demo10)
+% -------------------------------------------------------------------------
+% # version 4.0.0
+% + 左键添加数据提示框，右键隐藏高亮 
+%   Left-click to add data tooltip, right-click to hide highlight
+% # version 4.1.0
+% + 使用 addHighlightArrow 添加提示箭头
+%   Use function addHighlightArrow to add arrow(demo13)
+% + 节点可分组
+%   Nodes are groupable(demo14)
 
 
     properties
@@ -92,14 +99,19 @@ classdef biChordChart < handle
         %               color                               text format
         dataTipFormat = {'k', 'Source:', 'Target:', 'Value:', 'auto'}
 
-        thetaSet=[];meanThetaSet;rotationSet;thetaFullSet
-        Sep;Arrow;CData;LRadius=1.28;LRotate='off';SSqRatio=0;OSqRatio=1;Rotation=0;
+        thetaSet=[]; meanThetaSet; iMidThetaSet; jMidThetaSet;
+        rotationSet; thetaFullSet
+
+        Sep; Arrow; CData; Group; GroupSep
+
+        LRadius=1.28; LRotate='off'; SSqRatio=0; OSqRatio=1; Rotation=0;
         linearTickSep, linearTickCompactDegree = 3.5, linearMinorTick = 'off';
     end
 
     methods
         function obj=biChordChart(varargin)
             obj.Sep=1/10;
+            obj.GroupSep = 1/15;
             obj.Arrow='off';
             obj.CData=[127,91,93;187,128,110;197,173,143;59,71,111;104,95,126;76,103,86;112,112,124;
                 72,39,24;197,119,106;160,126,88;238,208,146]./255;
@@ -110,6 +122,7 @@ classdef biChordChart < handle
             end  
             obj.ax.NextPlot='add';
             obj.dataMat=varargin{1};varargin(1)=[];
+            obj.Group = ones(1, size(obj.dataMat, 2));
             % 获取其他数据
             for i=1:2:(length(varargin)-1)
                 tid=ismember(lower(obj.arginList), lower(varargin{i}));
@@ -125,6 +138,9 @@ classdef biChordChart < handle
             if obj.Sep>1/2
                 obj.Sep=1/2;
             end
+            if obj.GroupSep>1/2
+                obj.GroupSep=1/2;
+            end
             % 调整颜色数量
             if size(obj.CData,1)<size(obj.dataMat,1)
                 obj.CData=[obj.CData;rand([size(obj.dataMat,1),3]).*.5+ones([size(obj.dataMat,1),3]).*.5];
@@ -137,7 +153,7 @@ classdef biChordChart < handle
             if obj.LRadius>2||obj.LRadius<1.2
                 obj.LRadius=1.28;
             end
-            help biChordChart
+            % help biChordChart
         end
 
         function obj=draw(obj)
@@ -149,6 +165,14 @@ classdef biChordChart < handle
             obj.ax.YColor='none';
             obj.ax.PlotBoxAspectRatio=[1,1,1];
             % 计算比例
+            if length(obj.Group) < size(obj.dataMat, 1)
+                obj.Group = ones(1, size(obj.dataMat, 2));
+            end
+            
+            tGroup = groupConsecutive(obj.Group);
+            groupNum = max(tGroup) - (obj.Group(end) == obj.Group(1));
+            
+
             numC=size(obj.dataMat,1);
             ratioC1=sum(abs(obj.dataMat),2)./sum(sum(abs(obj.dataMat)));
             ratioC2=sum(abs(obj.dataMat),1)./sum(sum(abs(obj.dataMat)));
@@ -157,9 +181,16 @@ classdef biChordChart < handle
 
             % version 2.0.0 更新部分
             obj.linearTickSep = obj.getTick(sum(sum(obj.dataMat))./(size(obj.dataMat,1)+size(obj.dataMat,2)).*2, obj.linearTickCompactDegree);
-
-            sepLen=(2*pi*obj.Sep)./numC;
-            baseLen=2*pi*(1-obj.Sep);
+            
+            if groupNum == 0
+                gsepLen = 0;
+                sepLen = (2*pi*obj.Sep)./numC;
+                baseLen = 2*pi*(1-obj.Sep);
+            else
+                gsepLen = (2*pi*obj.GroupSep)./groupNum;
+                sepLen = (2*pi*obj.Sep*(1 - obj.GroupSep))./numC;
+                baseLen = 2*pi*(1 - obj.Sep)*(1 - obj.GroupSep);
+            end
 
             if length(obj.Rotation) < 2
                 obj.Rotation = repmat(obj.Rotation, [numC,1]);
@@ -167,8 +198,8 @@ classdef biChordChart < handle
 
             % 绘制方块
             for i=1:numC
-                theta1=sepLen/2+sum(ratioC(1:i))*baseLen+(i-1)*sepLen + obj.Rotation(i);
-                theta2=sepLen/2+sum(ratioC(1:i+1))*baseLen+(i-1)*sepLen + obj.Rotation(i);
+                theta1 = sum(ratioC(1:i))*baseLen + (i - 1 + .5)*sepLen + obj.Rotation(i) + (tGroup(i) - 1 + .5)*gsepLen;
+                theta2 = sum(ratioC(1:i+1))*baseLen + (i - 1 + .5)*sepLen + obj.Rotation(i) + (tGroup(i) - 1 + .5)*gsepLen;
                 diffTheta(i) = theta2 - theta1;
                 if abs(obj.Rotation(1) - obj.Rotation(2))>eps
                     theta1=obj.Rotation(i) - diffTheta(i)/2;
@@ -176,32 +207,32 @@ classdef biChordChart < handle
                 end
                 theta=linspace(theta1,theta2,100);
                 X=cos(theta);Y=sin(theta);
-                obj.squareHdl(i)=fill([(1.15-.1*obj.OSqRatio).*X,1.15.*X(end:-1:1)],[(1.15-.1*obj.OSqRatio).*Y,1.15.*Y(end:-1:1)],...
+                obj.squareHdl(i)=fill(obj.ax, [(1.15-.1*obj.OSqRatio).*X,1.15.*X(end:-1:1)],[(1.15-.1*obj.OSqRatio).*Y,1.15.*Y(end:-1:1)],...
                     obj.CData(i,:),'EdgeColor','none');
                 theta3=mod((theta1+theta2)/2,2*pi);
                 obj.meanThetaSet(i)=theta3;
                 rotation=theta3/pi*180;
                 if rotation>0&&rotation<180
-                    obj.nameHdl(i)=text(cos(theta3).*obj.LRadius,sin(theta3).*obj.LRadius,obj.Label{i},'FontSize',14,'FontName','Arial',...
+                    obj.nameHdl(i)=text(obj.ax, cos(theta3).*obj.LRadius,sin(theta3).*obj.LRadius,obj.Label{i},'FontSize',14,'FontName','Arial',...
                     'HorizontalAlignment','center','Rotation',-(.5*pi-theta3)./pi.*180,'Tag','BiChordLabel');
                     obj.rotationSet(i)=-(.5*pi-theta3)./pi.*180;
                 else
-                    obj.nameHdl(i)=text(cos(theta3).*obj.LRadius,sin(theta3).*obj.LRadius,obj.Label{i},'FontSize',14,'FontName','Arial',...
+                    obj.nameHdl(i)=text(obj.ax, cos(theta3).*obj.LRadius,sin(theta3).*obj.LRadius,obj.Label{i},'FontSize',14,'FontName','Arial',...
                     'HorizontalAlignment','center','Rotation',-(1.5*pi-theta3)./pi.*180,'Tag','BiChordLabel');
                     obj.rotationSet(i)=-(1.5*pi-theta3)./pi.*180;
                 end
-                obj.RTickHdl(i)=plot(cos(theta).*1.17,sin(theta).*1.17,'Color',[0,0,0],'LineWidth',.8,'Visible','off');
+                obj.RTickHdl(i)=plot(obj.ax, cos(theta).*1.17,sin(theta).*1.17,'Color',[0,0,0],'LineWidth',.8,'Visible','off');
             end
 
             for i=1:numC
                 for j=1:numC
-                    theta_i_1=sepLen/2+sum(ratioC(1:i))*baseLen+(i-1)*sepLen;
-                    theta_i_2=sepLen/2+sum(ratioC(1:i+1))*baseLen+(i-1)*sepLen;
+                    theta_i_1 = sum(ratioC(1:i))*baseLen + (i - 1 + .5)*sepLen + (tGroup(i) - 1 + .5)*gsepLen;
+                    theta_i_2 = sum(ratioC(1:i+1))*baseLen + (i - 1 + .5)*sepLen + (tGroup(i) - 1 + .5)*gsepLen;
                     theta_i_3=theta_i_1+(theta_i_2-theta_i_1).*sum(abs(obj.dataMat(:,i)))./(sum(abs(obj.dataMat(:,i)))+sum(abs(obj.dataMat(i,:))));
-
-                    theta_j_1=sepLen/2+sum(ratioC(1:j))*baseLen+(j-1)*sepLen;
-                    theta_j_2=sepLen/2+sum(ratioC(1:j+1))*baseLen+(j-1)*sepLen;
-                    theta_j_3=theta_j_1+(theta_j_2-theta_j_1).*sum(abs(obj.dataMat(:,j)))./(sum(abs(obj.dataMat(:,j)))+sum(abs(obj.dataMat(j,:))));
+                    
+                    theta_j_1 = sum(ratioC(1:j))*baseLen + (j - 1 + .5)*sepLen + (tGroup(j) - 1 + .5)*gsepLen;
+                    theta_j_2 = sum(ratioC(1:j+1))*baseLen + (j - 1 + .5)*sepLen + (tGroup(j) - 1 + .5)*gsepLen;
+                    theta_j_3 = theta_j_1+(theta_j_2-theta_j_1).*sum(abs(obj.dataMat(:,j)))./(sum(abs(obj.dataMat(:,j)))+sum(abs(obj.dataMat(j,:))));
 
                     ratio_i_1=obj.dataMat(i,:);ratio_i_1=[0,ratio_i_1./sum(ratio_i_1)];
                     ratio_j_2=obj.dataMat(:,j)';ratio_j_2=[0,ratio_j_2./sum(ratio_j_2)];
@@ -226,6 +257,8 @@ classdef biChordChart < handle
                         obj.thetaFullSet{i}(j+1)=theta2;
                         obj.thetaFullSet{j}(i+numC)=theta3;
                         obj.thetaFullSet{j}(i+numC+1)=theta4;
+                        obj.iMidThetaSet(i, j) = (theta1 + theta2)./2;
+                        obj.jMidThetaSet(i, j) = (theta3 + theta4)./2;
 
                         if strcmp(obj.Arrow,'off')
                             % 计算贝塞尔曲线
@@ -242,14 +275,14 @@ classdef biChordChart < handle
                                 cos(theta3/2+theta4/2).*.99,sin(theta3/2+theta4/2).*.99;
                                 cos(theta3).*.96,sin(theta3).*.96];
                         end
-                        obj.chordMatHdl(i,j)=fill([tLine1(:,1);tline4(:,1);tLine2(end:-1:1,1);tline3(:,1)],...
+                        obj.chordMatHdl(i,j)=fill(obj.ax, [tLine1(:,1);tline4(:,1);tLine2(end:-1:1,1);tline3(:,1)],...
                             [tLine1(:,2);tline4(:,2);tLine2(end:-1:1,2);tline3(:,2)],...
                             obj.CData(i,:),'FaceAlpha',.3,'EdgeColor','none', 'UserData',[i,j], 'ButtonDownFcn', @obj.onChordClick);
                         XF=cos(linspace(theta1,theta2,100));YF=sin(linspace(theta1,theta2,100));
                         XT=cos(linspace(theta3,theta4,100));YT=sin(linspace(theta3,theta4,100));
-                        obj.squareFMatHdl(i,j)=fill([1.05.*XF,(1.05+obj.SSqRatio*.1).*XF(end:-1:1)],[1.05.*YF,(1.05+obj.SSqRatio*.1).*YF(end:-1:1)],...
+                        obj.squareFMatHdl(i,j)=fill(obj.ax, [1.05.*XF,(1.05+obj.SSqRatio*.1).*XF(end:-1:1)],[1.05.*YF,(1.05+obj.SSqRatio*.1).*YF(end:-1:1)],...
                             obj.CData(j,:),'EdgeColor','none');
-                        obj.squareTMatHdl(i,j)=fill([1.05.*XT,(1.05+obj.SSqRatio*.1).*XT(end:-1:1)],[1.05.*YT,(1.05+obj.SSqRatio*.1).*YT(end:-1:1)],...
+                        obj.squareTMatHdl(i,j)=fill(obj.ax, [1.05.*XT,(1.05+obj.SSqRatio*.1).*XT(end:-1:1)],[1.05.*YT,(1.05+obj.SSqRatio*.1).*YT(end:-1:1)],...
                             obj.CData(i,:),'EdgeColor','none');
                     else
                     end
@@ -308,7 +341,7 @@ classdef biChordChart < handle
                         tickY = [sin([obj.thetaFullSet{:}]).*1.17; sin([obj.thetaFullSet{:}]).*1.19; nan.*[obj.thetaFullSet{:}]];
                     end
             end
-            obj.thetaTickHdl = plot(tickX(:),tickY(:), 'Color',[0,0,0], 'LineWidth',.8, 'Visible','off');
+            obj.thetaTickHdl = plot(obj.ax, tickX(:),tickY(:), 'Color',[0,0,0], 'LineWidth',.8, 'Visible','off');
             % #############################################################
 
 
@@ -326,10 +359,10 @@ classdef biChordChart < handle
                     if ~isnan(obj.thetaFullSet{i}(j))
                     if rotation>90&&rotation<270
                         rotation=rotation+180;
-                        obj.thetaTickLabelHdl(i,j)=text(cos(obj.thetaFullSet{i}(j)).*1.2,sin(obj.thetaFullSet{i}(j)).*1.2,num2str(cumsumV(j)),...
+                        obj.thetaTickLabelHdl(i,j)=text(obj.ax, cos(obj.thetaFullSet{i}(j)).*1.2,sin(obj.thetaFullSet{i}(j)).*1.2,num2str(cumsumV(j)),...
                             'Rotation',rotation,'HorizontalAlignment','right','FontSize',9,'FontName','Arial','Visible','off','UserData',cumsumV(j));
                     else
-                        obj.thetaTickLabelHdl(i,j)=text(cos(obj.thetaFullSet{i}(j)).*1.2,sin(obj.thetaFullSet{i}(j)).*1.2,num2str(cumsumV(j)),...
+                        obj.thetaTickLabelHdl(i,j)=text(obj.ax, cos(obj.thetaFullSet{i}(j)).*1.2,sin(obj.thetaFullSet{i}(j)).*1.2,num2str(cumsumV(j)),...
                             'Rotation',rotation,'FontSize',9,'FontName','Arial','Visible','off','UserData',cumsumV(j));
                     end
                     end
@@ -343,6 +376,20 @@ classdef biChordChart < handle
                 coe1=factorial(p)./factorial(0:p)./factorial(p:-1:0);
                 coe2=((t).^((0:p)')).*((1-t).^((p:-1:0)'));
                 pnts=(pnts'*(coe1'.*coe2))';
+            end
+            function group_id = groupConsecutive(arr)
+                if isempty(arr)
+                    group_id = [];
+                    return;
+                end
+                group_id = ones(size(arr));
+                current_group = 1;
+                for ind = 2:length(arr)
+                    if arr(ind) ~= arr(ind-1)
+                        current_group = current_group + 1;
+                    end
+                    group_id(ind) = current_group;
+                end
             end
 
             obj.labelRotate(obj.LRotate)
@@ -402,7 +449,7 @@ classdef biChordChart < handle
         end
         % version 1.1.0 更新部分
         % 标签旋转状态设置
-        function labelRotate(obj,Rotate)
+        function labelRotate(obj, Rotate)
             obj.LRotate=Rotate;
             for i=1:size(obj.dataMat,1)
                 set(obj.nameHdl(i),'HorizontalAlignment','center','Rotation',obj.rotationSet(i))
@@ -467,6 +514,24 @@ classdef biChordChart < handle
             tXN = ceil(log(tXS) / log(10));
             tXS = round(round(tXS / 10^(tXN-2)) / 5) * 5 * 10^(tXN-2);
         end
+        function tHdl = addHighlightArrow(obj, i, j)
+            tPnt1 = [cos(obj.iMidThetaSet(i, j)), sin(obj.iMidThetaSet(i, j))];
+            tPnt2 = [cos(obj.jMidThetaSet(i, j)), sin(obj.jMidThetaSet(i, j))];
+            tLine = bezierCurve([tPnt1;0,0;tPnt2],200);
+            tHdl.Line = plot(obj.ax, tLine(:,1), tLine(:,2), 'LineWidth',1, 'Color',[0,0,0]);
+
+            tPnt3 = [cos(obj.jMidThetaSet(i, j) - pi/100).*.95, sin(obj.jMidThetaSet(i, j) - pi/100).*.95];
+            tPnt4 = [cos(obj.jMidThetaSet(i, j) + pi/100).*.95, sin(obj.jMidThetaSet(i, j) + pi/100).*.95];
+            tHdl.Arrow = fill(obj.ax, [tPnt2(1), tPnt3(1), tPnt4(1)], [tPnt2(2), tPnt3(2), tPnt4(2)], [0,0,0]);
+
+            function pnts=bezierCurve(pnts,N)
+                t=linspace(0,1,N);
+                p=size(pnts,1)-1;
+                coe1=factorial(p)./factorial(0:p)./factorial(p:-1:0);
+                coe2=((t).^((0:p)')).*((1-t).^((p:-1:0)'));
+                pnts=(pnts'*(coe1'.*coe2))';
+            end
+        end
         function onChordClick(obj, src, event)
             if ~verLessThan('matlab', '9.7')
             if event.Button == 1
@@ -491,7 +556,7 @@ classdef biChordChart < handle
 % 公众号  : slandarer随笔
 % 知乎    : slandarer
 % -------------------------------------------------------------------------
-% Zhaoxu Liu / slandarer (2024). Digraph chord chart 有向弦图 
-% (https://www.mathworks.com/matlabcentral/fileexchange/121043-digraph-chord-chart), 
-% MATLAB Central File Exchange. 检索来源 2024/3/31.
+% Zhaoxu Liu / slandarer (2026). biChordChart (bidirectional chord diagram | 有向弦图) 
+% (https://www.mathworks.com/matlabcentral/fileexchange/121043-bichordchart-bidirectional-chord-diagram), 
+% MATLAB Central File Exchange. Retrieved April 14, 2026.
 end
