@@ -72,7 +72,7 @@ text(axS, 1:LN, zeros(1, LN), layerNames, ...
 
 % 绘制弦图 (Draw sankey diagrams)
 for i = 1:(LN - 1)
-    tCC = biChordChart(axC{i}, layerAdj{i});
+    tCC = biChordChart(axC{i}, layerAdj{i}, 'Arrow','on');
     tCC.Label = nodeNames;
     tCC.CData = CList;
     tCC.draw();
