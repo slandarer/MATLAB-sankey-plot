@@ -160,7 +160,7 @@ classdef SSankey < handle
         LabelHdl;                            % Node label handles (标签句柄)
         ValueLabelHdl;                       % Value label handles (数值标签句柄)
         ax;                                  % Axes handle (坐标区句柄)
-        Parent;                              % Parent figure or axes (父容器)
+        Parent;                              % Parent axes (父容器)
         
         % Internal state (内部状态)
         BN; LN; VN; % read only              % Number of nodes, layers, links (节点数、层数、连接数)
@@ -401,7 +401,7 @@ classdef SSankey < handle
                 tSource = obj.SourceInd(n);
                 tTarget = obj.TargetInd(n);
                 
-                tS1 = sum(obj.AdjMat(tSource, 1:(tTarget - 1))) + tLayerPos(tSource, 3);
+                tS1 = sum(obj.AdjMat(tSource, 1:(tTarget - 1)))  + tLayerPos(tSource, 3);
                 tS2 = sum(obj.AdjMat(tSource, 1:tTarget))        + tLayerPos(tSource, 3);
                 tT1 = sum(obj.AdjMat(1:(tSource - 1), tTarget))  + tLayerPos(tTarget, 3);
                 tT2 = sum(obj.AdjMat(1:tSource, tTarget))        + tLayerPos(tTarget, 3);
@@ -442,7 +442,7 @@ classdef SSankey < handle
             tSource = obj.SourceInd(n);
             tTarget = obj.TargetInd(n);
             
-            tS1 = sum(obj.AdjMat(tSource, 1:(tTarget - 1))) + obj.LayerPos(tSource, 3);
+            tS1 = sum(obj.AdjMat(tSource, 1:(tTarget - 1)))  + obj.LayerPos(tSource, 3);
             tS2 = sum(obj.AdjMat(tSource, 1:tTarget))        + obj.LayerPos(tSource, 3);
             tT1 = sum(obj.AdjMat(1:(tSource - 1), tTarget))  + obj.LayerPos(tTarget, 3);
             tT2 = sum(obj.AdjMat(1:tSource, tTarget))        + obj.LayerPos(tTarget, 3);
@@ -663,7 +663,7 @@ classdef SSankey < handle
                 tSource = obj.SourceInd(i);
                 tTarget = obj.TargetInd(i);
                 if tSource == n || tTarget == n
-                    tS1 = sum(obj.AdjMat(tSource, 1:(tTarget - 1))) + tLayerPos(tSource, 3);
+                    tS1 = sum(obj.AdjMat(tSource, 1:(tTarget - 1)))  + tLayerPos(tSource, 3);
                     tS2 = sum(obj.AdjMat(tSource, 1:tTarget))        + tLayerPos(tSource, 3);
                     tT1 = sum(obj.AdjMat(1:(tSource - 1), tTarget))  + tLayerPos(tTarget, 3);
                     tT2 = sum(obj.AdjMat(1:tSource, tTarget))        + tLayerPos(tTarget, 3);
