@@ -1,3 +1,4 @@
+%% Reproduction of a Nature Communications figure example
 % -----------------------------------------------------+
 % @author  | slandarer                                 |
 % 公众号   | slandarer随笔                              |
