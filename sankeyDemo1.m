@@ -1,8 +1,4 @@
-% sankey demo1 : Basic usage
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo1 : Basic usage
 
 figure('Name','sankey demo1','Units','normalized','Position',[.05,.2,.5,.56])
 

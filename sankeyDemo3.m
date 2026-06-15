@@ -1,8 +1,4 @@
-% sankey demo3 : Set color
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo3 : Set color
 
 figure('Name','sankey demo3_1','Units','normalized','Position',[.05,.2,.5,.56])
 

@@ -1,11 +1,4 @@
-% sankey demo0 : Basic uasge - equivalent code
-% -----------------------
-% gitee/github      : slandarer
-% fileexchange      : Zhaoxu Liu / slandarer
-% 公众号            : slandarer随笔
-% 知乎              : slandarer
-
-
+%% sankey demo0 : Basic uasge - equivalent code
 
 %% Basic usage - links
 figure()
@@ -44,3 +37,4 @@ SK2 = SSankey([], [], [], 'AdjMat',adjMat);
 SK2.NodeList = {'a', 'b', 'c', 'A', 'B', 'C', 'AA', 'BB', 'CC'};
 
 SK2.draw()
+

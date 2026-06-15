@@ -1,8 +1,8 @@
 classdef SSankey < handle
 % SSankey Create and customize Sankey diagrams (桑基图对象)
 %   SS = SSankey(source, target, value); creates a Sankey diagram from
-%   three arrays: source nodes, target nodes, and flow values.
-%   通过源节点、目标节点和流量值创建桑基图对象。
+%   three cell arrays: source nodes, target nodes, and flow values.
+%   通过源节点、目标节点和流量值元胞数组创建桑基图对象。
 %
 %   SS = SSankey([], [], [], 'AdjMat', adjMat); creates a Sankey diagram
 %   from an adjacency matrix where element (i,j) represents flow from i to j.
@@ -115,28 +115,41 @@ classdef SSankey < handle
 %   try : obj.setLabelLocation(1, 'left')
 
     properties
+        ax;                                  % Axes handle (坐标区句柄)
+        Parent;                              % Parent axes (父容器)
+
+        % Parameter list for name-value pair parsing (参数解析列表)
+        arginList = {'RenderingMethod', 'LabelLocation', 'ValueLabelLocation', 'BlockScale', 'Layer', ...
+            'Sep', 'Align', 'ColorList', 'Parent', 'NodeList', 'AdjMat'}
+
         % Core data (核心数据)
         Source; Target; Value;               % Source, target, and flow value (源、目标、流量值)
-        SourceInd; TargetInd; % read only    % Indices of source and target (源/目标索引)
+
+        % Adjacency matrix (邻接矩阵)
+        AdjMat;                              % Adjacency matrix (邻接矩阵)
         
         % Layer management (层级管理)
         Layer;                               % Layer assignment for each node (节点层级分配)
-        LayerPos; % read only                % Position of each layer (每层位置)
-        MovePos; % read only                 % Manual displacement offset (手动位移偏移)
-        LayerOrder = 'normal';               % Layer propagation direction (层级传播方向)
+        LayerOrder = 'normal';               % 'normal'/'reverse' Layer propagation direction (层级传播方向)
         
-        % Adjacency matrix (邻接矩阵)
-        AdjMat;                              % Adjacency matrix (邻接矩阵)
-        BoolMat; % read only                 % Logical matrix of non-zero connections (非零连接逻辑矩阵)
+        % Color settings (颜色设置)
+        ColorList = [[ 65, 140, 240; 252, 180,  65; 224,  64,  10;   5, 100, 146; 
+            191, 191, 191;  26,  59, 105; 255, 227, 130;  18, 156, 221;
+            202, 107,  75;   0,  92, 219; 243, 210, 136;  80,  99, 129; 
+            241, 185, 168; 224, 131,  10; 120, 147, 190]./255;
+            [127,  91,  93; 187, 128, 110; 197, 173, 143;  59,  71, 111; 
+            104,  95, 126;  76, 103,  86; 112, 112, 124;  72,  39,  24; 
+            197, 119, 106; 160, 126,  88; 238, 208, 146]./255 ];
         
         % Rendering options (渲染选项)
         RenderingMethod = 'interp';          % 'left'/'right'/'interp'/'map'/'simple'
         LabelLocation = 'left';              % 'left'/'right'/'top'/'center'/'bottom' (标签位置)
-        ValueLabelLocation = 'none';         % 'left'/'right'/'center'/'none' (数值标签位置)
-        ValueLabelFormat = @(X) num2str(X);  % Value formatting function (数值格式化函数)
         Align = 'center';                    % 'up'/'down'/'center' (垂直对齐方式)
         BlockScale = 0.05;                   % Block width factor (块宽度因子) > 0
         Sep = 0.05;                          % Gap between blocks (块间间隙) >= 0
+        ValueLabelLocation = 'none';         % 'left'/'right'/'center'/'none' (数值标签位置)
+        ValueLabelFormat = @(X) num2str(X);  % Value formatting function (数值格式化函数)
+        
         
         % Node properties (节点属性)
         NodeList = {};                       % Cell array of node names (节点名称元胞数组)
@@ -145,33 +158,44 @@ classdef SSankey < handle
         % {Alpha, SrcLabel, TgtLabel, ValLabel, Format}
         dataTipFormat = {1, 'Source:', 'Target:', 'Value:', 'auto'};  
         
-        % Color settings (颜色设置)
-        ColorList = [[ 65, 140, 240; 252, 180,  65; 224,  64,  10;   5, 100, 146; 
-                      191, 191, 191;  26,  59, 105; 255, 227, 130;  18, 156, 221;
-                      202, 107,  75;   0,  92, 219; 243, 210, 136;  80,  99, 129; 
-                      241, 185, 168; 224, 131,  10; 120, 147, 190]./255;
-                     [127,  91,  93; 187, 128, 110; 197, 173, 143;  59,  71, 111; 
-                      104,  95, 126;  76, 103,  86; 112, 112, 124;  72,  39,  24; 
-                      197, 119, 106; 160, 126,  88; 238, 208, 146]./255 ];
-        
         % Graphics handles (图形句柄)
-        BlockHdl;                            % Node block handles (方块句柄)
-        LinkHdl;                             % Link ribbon handles (连接句柄)
-        LabelHdl;                            % Node label handles (标签句柄)
-        ValueLabelHdl;                       % Value label handles (数值标签句柄)
-        ax;                                  % Axes handle (坐标区句柄)
-        Parent;                              % Parent axes (父容器)
-        
+        blockHdl;                            % Node block handles (方块句柄)
+        linkHdl;                             % Link ribbon handles (连接句柄)
+        labelHdl;                            % Node label handles (标签句柄)
+        valueLabelHdl;                       % Value label handles (数值标签句柄)
+    end
+
+    properties (Hidden)
+        SourceInd; TargetInd;                % Indices of source and target (源/目标索引)
+        BoolMat;                             % Logical matrix of non-zero connections (非零连接逻辑矩阵)
+        LayerPos;                            % Position of each layer (每层位置)
+        MovePos;                             % Manual displacement offset (手动位移偏移)
         % Internal state (内部状态)
-        BN; LN; VN; % read only              % Number of nodes, layers, links (节点数、层数、连接数)
-        TotalLen; SepLen; % read only        % Total block length and separation length (总块长度、间隔长度)
-        
-        % Parameter list for name-value pair parsing (参数解析列表)
-        arginList = {'RenderingMethod', 'LabelLocation', 'ValueLabelLocation', 'BlockScale', 'Layer', ...
-                     'Sep', 'Align', 'ColorList', 'Parent', 'NodeList', 'AdjMat'}
+        BN; LN; VN;                          % Number of nodes, layers, links (节点数、层数、连接数)
+        TotalLen; SepLen;                    % Total block length and separation length (总块长度、间隔长度)
+    end
+
+    % Shorthands / alias
+    properties (Dependent)
+        CData % ColorList
+        BlockHdl;
+        LinkHdl;
+        LabelHdl;
+        ValueLabelHdl;
     end
 
     methods
+        function val = get.CData(obj),         val = obj.ColorList;     end
+        function val = get.BlockHdl(obj),      val = obj.blockHdl;      end
+        function val = get.LinkHdl(obj),       val = obj.linkHdl;       end
+        function val = get.LabelHdl(obj),      val = obj.labelHdl;      end
+        function val = get.ValueLabelHdl(obj), val = obj.valueLabelHdl; end
+
+        function set.CData(obj, val),         obj.ColorList     = val; end
+        function set.BlockHdl(obj, val),      obj.blockHdl      = val; end
+        function set.LinkHdl(obj, val),       obj.linkHdl       = val; end
+        function set.LabelHdl(obj, val),      obj.labelHdl      = val; end
+        function set.ValueLabelHdl(obj, val), obj.valueLabelHdl = val; end
 % =========================================================================
 % Constructor (构造函数)
 % =========================================================================
@@ -251,11 +275,15 @@ classdef SSankey < handle
             obj.getLayerPos()
             
             % Draw links first (先绘制连接)
+            obj.linkHdl = gobjects(1, obj.VN);
+            obj.valueLabelHdl = gobjects(1, obj.VN);
             for i = 1:obj.VN
                 obj.drawLink(i)
             end
             
             % Draw nodes on top (再绘制方块)
+            obj.blockHdl = gobjects(1, obj.BN);
+            obj.labelHdl = gobjects(1, obj.BN);
             for i = 1:obj.BN
                 drawNode(obj, i)
             end
@@ -270,19 +298,19 @@ classdef SSankey < handle
 % Graphics property setters (图形属性设置方法)
 % =========================================================================
         function setBlock(obj, n, varargin)
-            set(obj.BlockHdl(n), varargin{:})
+            set(obj.blockHdl(n), varargin{:})
         end
         
         function setLink(obj, n, varargin)
-            set(obj.LinkHdl(n), varargin{:})
+            set(obj.linkHdl(n), varargin{:})
         end
         
         function setLabel(obj, n, varargin)
-            set(obj.LabelHdl(n), varargin{:})
+            set(obj.labelHdl(n), varargin{:})
         end
         
         function setValueLabel(obj, n, varargin)
-            set(obj.ValueLabelHdl(n), varargin{:})
+            set(obj.valueLabelHdl(n), varargin{:})
         end
 
 
@@ -291,7 +319,7 @@ classdef SSankey < handle
 % =========================================================================
         function addLink(obj, S, T, V)
             obj.getAdjMat()
-            if isempty(obj.BlockHdl)
+            if isempty(obj.blockHdl)
                 obj.AdjMat(S, T) = obj.AdjMat(S, T) + abs(V);
             else
                 if obj.AdjMat(S, T) == 0
@@ -348,7 +376,7 @@ classdef SSankey < handle
             obj.MovePos(end + 1, :) = 0;
             
             % Redraw if already rendered (若已渲染则重绘)
-            if ~isempty(obj.BlockHdl)
+            if ~isempty(obj.blockHdl)
                 obj.getLayerPos()
                 obj.drawNode(length(obj.NodeList))
                 N = find(obj.Layer == obj.Layer(end));
@@ -378,20 +406,20 @@ classdef SSankey < handle
             
             % Update nodes (更新节点)
             for n = 1:obj.BN
-                set(obj.BlockHdl(n), 'XData', tLayerPos(n, [1, 2, 2, 1]));
-                set(obj.BlockHdl(n), 'YData', tLayerPos(n, [3, 3, 4, 4]));
+                set(obj.blockHdl(n), 'XData', tLayerPos(n, [1, 2, 2, 1]));
+                set(obj.blockHdl(n), 'YData', tLayerPos(n, [3, 3, 4, 4]));
                 
                 switch tLabelLocation{n}
                     case 'right'
-                        set(obj.LabelHdl(n), 'Position', [tLayerPos(n, 2), mean(tLayerPos(n, [3, 4]))]);
+                        set(obj.labelHdl(n), 'Position', [tLayerPos(n, 2), mean(tLayerPos(n, [3, 4]))]);
                     case 'left'
-                        set(obj.LabelHdl(n), 'Position', [tLayerPos(n, 1), mean(tLayerPos(n, [3, 4]))]);
+                        set(obj.labelHdl(n), 'Position', [tLayerPos(n, 1), mean(tLayerPos(n, [3, 4]))]);
                     case 'top'
-                        set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 3)]);
+                        set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 3)]);
                     case 'center'
-                        set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), mean(tLayerPos(n, [3, 4]))]);
+                        set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), mean(tLayerPos(n, [3, 4]))]);
                     case 'bottom'
-                        set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 4)]);
+                        set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 4)]);
                 end
             end
             
@@ -417,18 +445,18 @@ classdef SSankey < handle
                 qY2 = interp1(tX, [tS2, tS2, tT2, tT2], qX, 'pchip');
                 YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
                 
-                set(obj.LinkHdl(n), 'YData', YY, 'XData', qX);
-                set(obj.ValueLabelHdl(n), 'String', [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))]);
+                set(obj.linkHdl(n), 'YData', YY, 'XData', qX);
+                set(obj.valueLabelHdl(n), 'String', [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))]);
                 
                 switch obj.ValueLabelLocation
                     case 'left'
-                        set(obj.ValueLabelHdl(n), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
+                        set(obj.valueLabelHdl(n), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
                     case 'right'
-                        set(obj.ValueLabelHdl(n), 'Position', [tLayerPos(tTarget, 1), tT1/2 + tT2/2]);
+                        set(obj.valueLabelHdl(n), 'Position', [tLayerPos(tTarget, 1), tT1/2 + tT2/2]);
                     case 'center'
-                        set(obj.ValueLabelHdl(n), 'Position', [tLayerPos(tSource, 2)/2 + tLayerPos(tTarget, 1)/2, tS1/4 + tS2/4 + tT1/4 + tT2/4]);
+                        set(obj.valueLabelHdl(n), 'Position', [tLayerPos(tSource, 2)/2 + tLayerPos(tTarget, 1)/2, tS1/4 + tS2/4 + tT1/4 + tT2/4]);
                     case 'none'
-                        set(obj.ValueLabelHdl(n), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
+                        set(obj.valueLabelHdl(n), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
                 end
             end
         end
@@ -490,7 +518,7 @@ classdef SSankey < handle
             % Create link surface (创建连接曲面)
             tLinkHdl = surf(obj.ax, XX, YY, XX .* 0, 'EdgeColor', 'none', 'FaceAlpha', 0.3, ...
                 'CData', MeshC, 'UserData', n, 'ButtonDownFcn', @obj.onLinkClick);
-            obj.LinkHdl = [obj.LinkHdl(1:n-1), tLinkHdl, obj.LinkHdl(n:end)];
+            obj.linkHdl = [obj.linkHdl(1:n-1), tLinkHdl, obj.linkHdl(n:end)];
             
             % Create value label (创建数值标签)
             switch obj.ValueLabelLocation
@@ -512,7 +540,7 @@ classdef SSankey < handle
                         [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
                         'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left', 'Visible', 'off');
             end
-            obj.ValueLabelHdl = [obj.ValueLabelHdl(1:n-1), tValueLabelHdl, obj.ValueLabelHdl(n:end)];
+            obj.valueLabelHdl = [obj.valueLabelHdl(1:n-1), tValueLabelHdl, obj.valueLabelHdl(n:end)];
         end
 
 
@@ -521,7 +549,7 @@ classdef SSankey < handle
 % =========================================================================
         function drawNode(obj, n)
             % Draw node block (绘制方块)
-            obj.BlockHdl(n) = fill(obj.ax, obj.LayerPos(n, [1, 2, 2, 1]), ...
+            obj.blockHdl(n) = fill(obj.ax, obj.LayerPos(n, [1, 2, 2, 1]), ...
                 obj.LayerPos(n, [3, 3, 4, 4]), obj.ColorList(n, :), 'EdgeColor', 'none');
 
             % Prepare label locations (准备标签位置)
@@ -534,20 +562,20 @@ classdef SSankey < handle
             % Draw node label (绘制节点标签)
             switch tLabelLocation{n}
                 case 'right'
-                    obj.LabelHdl(n) = text(obj.ax, obj.LayerPos(n, 2), mean(obj.LayerPos(n, [3, 4])), ...
+                    obj.labelHdl(n) = text(obj.ax, obj.LayerPos(n, 2), mean(obj.LayerPos(n, [3, 4])), ...
                         [' ', obj.NodeList{n}, ' '], 'FontSize', 15, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left');
                 case 'left'
-                    obj.LabelHdl(n) = text(obj.ax, obj.LayerPos(n, 1), mean(obj.LayerPos(n, [3, 4])), ...
+                    obj.labelHdl(n) = text(obj.ax, obj.LayerPos(n, 1), mean(obj.LayerPos(n, [3, 4])), ...
                         [' ', obj.NodeList{n}, ' '], 'FontSize', 15, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'right');
                 case 'top'
-                    obj.LabelHdl(n) = text(obj.ax, mean(obj.LayerPos(n, [1, 2])), obj.LayerPos(n, 3), ...
+                    obj.labelHdl(n) = text(obj.ax, mean(obj.LayerPos(n, [1, 2])), obj.LayerPos(n, 3), ...
                         [' ', obj.NodeList{n}, ' '], 'FontSize', 15, 'FontName', 'Times New Roman', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
                 case 'center'
-                    obj.LabelHdl(n) = text(obj.ax, mean(obj.LayerPos(n, [1, 2])), mean(obj.LayerPos(n, [3, 4])), ...
+                    obj.labelHdl(n) = text(obj.ax, mean(obj.LayerPos(n, [1, 2])), mean(obj.LayerPos(n, [3, 4])), ...
                         [' ', obj.NodeList{n}, ' '], 'FontSize', 15, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'center');
                 case 'bottom'
-                    obj.LabelHdl(n) = text(obj.ax, mean(obj.LayerPos(n, [1, 2])), obj.LayerPos(n, 4), ...
+                    obj.labelHdl(n) = text(obj.ax, mean(obj.LayerPos(n, [1, 2])), obj.LayerPos(n, 4), ...
                         [' ', obj.NodeList{n}, ' '], 'FontSize', 15, 'FontName', 'Times New Roman', ...
                         'HorizontalAlignment', 'center', 'VerticalAlignment', 'top');
             end
@@ -637,8 +665,8 @@ classdef SSankey < handle
 % =========================================================================
         function moveBlock(obj, n)
             tLayerPos = obj.MovePos + obj.LayerPos;
-            set(obj.BlockHdl(n), 'XData', tLayerPos(n, [1, 2, 2, 1]));
-            set(obj.BlockHdl(n), 'YData', tLayerPos(n, [3, 3, 4, 4]));
+            set(obj.blockHdl(n), 'XData', tLayerPos(n, [1, 2, 2, 1]));
+            set(obj.blockHdl(n), 'YData', tLayerPos(n, [3, 3, 4, 4]));
             
             if ischar(obj.LabelLocation)
                 tLabelLocation = repmat({obj.LabelLocation}, 1, obj.BN);
@@ -648,15 +676,15 @@ classdef SSankey < handle
             
             switch tLabelLocation{n}
                 case 'right'
-                    set(obj.LabelHdl(n), 'Position', [tLayerPos(n, 2), mean(tLayerPos(n, [3, 4]))]);
+                    set(obj.labelHdl(n), 'Position', [tLayerPos(n, 2), mean(tLayerPos(n, [3, 4]))]);
                 case 'left'
-                    set(obj.LabelHdl(n), 'Position', [tLayerPos(n, 1), mean(tLayerPos(n, [3, 4]))]);
+                    set(obj.labelHdl(n), 'Position', [tLayerPos(n, 1), mean(tLayerPos(n, [3, 4]))]);
                 case 'top'
-                    set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 3)]);
+                    set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 3)]);
                 case 'center'
-                    set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), mean(tLayerPos(n, [3, 4]))]);
+                    set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), mean(tLayerPos(n, [3, 4]))]);
                 case 'bottom'
-                    set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 4)]);
+                    set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 4)]);
             end
             
             for i = 1:obj.VN
@@ -680,18 +708,18 @@ classdef SSankey < handle
                     qY2 = interp1(tX, [tS2, tS2, tT2, tT2], qX, 'pchip');
                     YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
                     
-                    set(obj.LinkHdl(i), 'YData', YY, 'XData', qX);
+                    set(obj.linkHdl(i), 'YData', YY, 'XData', qX);
                     
                     switch obj.ValueLabelLocation
                         case 'left'
-                            set(obj.ValueLabelHdl(i), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
+                            set(obj.valueLabelHdl(i), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
                         case 'right'
-                            set(obj.ValueLabelHdl(i), 'Position', [tLayerPos(tTarget, 1), tT1/2 + tT2/2]);
+                            set(obj.valueLabelHdl(i), 'Position', [tLayerPos(tTarget, 1), tT1/2 + tT2/2]);
                         case 'center'
-                            set(obj.ValueLabelHdl(i), 'Position', [tLayerPos(tSource, 2)/2 + tLayerPos(tTarget, 1)/2, ...
+                            set(obj.valueLabelHdl(i), 'Position', [tLayerPos(tSource, 2)/2 + tLayerPos(tTarget, 1)/2, ...
                                 tS1/4 + tS2/4 + tT1/4 + tT2/4]);
                         case 'none'
-                            set(obj.ValueLabelHdl(i), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
+                            set(obj.valueLabelHdl(i), 'Position', [tLayerPos(tSource, 2), tS1/2 + tS2/2]);
                     end
                 end
             end
@@ -750,19 +778,19 @@ classdef SSankey < handle
                 obj.LabelLocation{n} = location;
                 switch obj.LabelLocation{n}
                     case 'right'
-                        set(obj.LabelHdl(n), 'Position', [tLayerPos(n, 2), mean(tLayerPos(n, [3, 4]))], ...
+                        set(obj.labelHdl(n), 'Position', [tLayerPos(n, 2), mean(tLayerPos(n, [3, 4]))], ...
                             'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
                     case 'left'
-                        set(obj.LabelHdl(n), 'Position', [tLayerPos(n, 1), mean(tLayerPos(n, [3, 4]))], ...
+                        set(obj.labelHdl(n), 'Position', [tLayerPos(n, 1), mean(tLayerPos(n, [3, 4]))], ...
                             'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
                     case 'top'
-                        set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 3)], ...
+                        set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 3)], ...
                             'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
                     case 'center'
-                        set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), mean(tLayerPos(n, [3, 4]))], ...
+                        set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), mean(tLayerPos(n, [3, 4]))], ...
                             'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
                     case 'bottom'
-                        set(obj.LabelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 4)], ...
+                        set(obj.labelHdl(n), 'Position', [mean(tLayerPos(n, [1, 2])), tLayerPos(n, 4)], ...
                             'HorizontalAlignment', 'center', 'VerticalAlignment', 'top');
                 end
             end

@@ -1,8 +1,4 @@
-% sankey demo15 : Add links
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo15 : Add links
 
 figure('Name','sankey demo15','Units','normalized','Position',[.05,.2,.5,.56])
 

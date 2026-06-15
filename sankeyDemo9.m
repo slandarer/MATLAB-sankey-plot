@@ -1,8 +1,4 @@
-% sankey demo9 : Using an adjacency matrix as input.
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo9 : Using an adjacency matrix as input.
 
 figure('Name','sankey demo9','Units','normalized','Position',[.05,.2,.5,.56])
 

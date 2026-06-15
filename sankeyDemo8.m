@@ -1,37 +1,29 @@
-% sankey demo8
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo8 : A complex demo
 
 figure('Name','sankey demo8','Units','normalized','Position',[.05,.2,.5,.56])
 
 % 随机生成数据(Randomly generated data)
-clc;clear;
-SourceValue=randi([1,30],[1,9]);
-LayerNum=[9,6,4,7,10];
-links{1,3}='';
-for k=1:4
-    TargetValue=zeros(1,LayerNum(k+1));
-    for i=1:LayerNum(k)
-        tValue=randi([0,13],[1,LayerNum(k+1)]);
-        tValue=tValue./sum(tValue).*SourceValue(i);
-        for j=1:LayerNum(k+1)
-            TargetValue(j)=TargetValue(j)+tValue(j);
-            if tValue(j)>eps
-                tLen=size(links,1);
-                links{tLen+1,1}=[char(64+k),num2str(i)];
-                links{tLen+1,2}=[char(64+k+1),num2str(j)];
-                links{tLen+1,3}=tValue(j);
-            end
-        end
-    end
-    SourceValue=TargetValue;
+clc;clear;rng(1)
+layerNodeName = {'A','B','C','D','E'};
+layerNodeNum = [9,6,4,7,10];
+cumSumNodeNum = [0, cumsum(layerNodeNum)];
+nodeList{sum(layerNodeNum)} = '';
+layerAdj{length(layerNodeNum) - 1} = [];
+layerAdj{1} = rand(layerNodeNum(1:2));
+
+for i = 1:length(layerNodeNum)
+    nodeList((cumSumNodeNum(i) + 1):cumSumNodeNum(i + 1)) = ...
+        compose([layerNodeName{i},'%d'], 1:layerNodeNum(i));
 end
-links(1,:)=[];
+for i = 2:(length(layerNodeNum) - 1)
+    layerAdj{i} = rand(layerNodeNum(i:(i + 1)));
+    layerAdj{i} = layerAdj{i}./sum(layerAdj{i}, 2).*(sum(layerAdj{i - 1}, 1).');
+end
+adjMat = mergeAdjMat(layerAdj);
 
 % 创建桑基图对象(Create a Sankey diagram object)
-SK=SSankey(links(:,1),links(:,2),links(:,3));
+SK=SSankey([],[],[], 'AdjMat',adjMat);
+SK.NodeList = nodeList;
 
 
 % 修改链接颜色渲染方式(Set link color rendering method)

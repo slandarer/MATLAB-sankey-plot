@@ -1,8 +1,4 @@
-% sankey demo2 : Block scale
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo2 : Block scale
 
 figure('Name','sankey demo2','Units','normalized','Position',[.05,.2,.5,.56])
 

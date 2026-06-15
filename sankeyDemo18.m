@@ -1,8 +1,9 @@
-% sankey demo18 : State transition matrix visualization
+%% sankey demo18 : State transition matrix visualization
 % -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+% gitee/github      : slandarer
+% fileexchange      : Zhaoxu Liu / slandarer
+% 公众号            : slandarer随笔
+% 知乎              : slandarer
 
 % 本示例来源于: 代号鸢黄月英
 
@@ -43,7 +44,7 @@ SK.ValueLabelLocation = 'left';
 SK.Align = 'down';
 SK.draw()
 
-legend(SK.BlockHdl(1:NN), nodeNames, 'FontSize',15, 'FontName','Times New Roman', 'Box','off')
+legend(SK.blockHdl(1:NN), nodeNames, 'FontSize',15, 'FontName','Times New Roman', 'Box','off')
 ax = gca;
 text(1:LN, ones(1, LN).*ax.YLim(2), layerNames, ...
     'HorizontalAlignment','center', 'VerticalAlignment','top', ...

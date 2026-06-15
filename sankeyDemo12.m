@@ -1,8 +1,5 @@
-% sankey demo12 : Show values for links.
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo12 : Show values for links.
+
 
 figure('Name','sankey demo12','Units','normalized','Position',[.05,.2,.5,.56])
 

@@ -1,8 +1,4 @@
-% sankey demo5 : Set block/link/label
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo5 : Set block/link/label
 
 figure('Name','sankey demo1','Units','normalized','Position',[.05,.2,.5,.56])
 

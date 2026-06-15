@@ -1,8 +1,4 @@
-% sankey demo11 : Move the x/y‑coordinate of the node(block)
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo11 : Move the x/y‑coordinate of the node(block)
 
 figure('Name','sankey demo11','Units','normalized','Position',[.05,.2,.5,.56])
 

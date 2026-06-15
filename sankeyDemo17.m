@@ -1,8 +1,9 @@
-% sankey demo17 : Land use transition sankey diagram
+%% sankey demo17 : Land use transition sankey diagram
 % -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+% gitee/github      : slandarer
+% fileexchange      : Zhaoxu Liu / slandarer
+% 公众号            : slandarer随笔
+% 知乎              : slandarer
 
 % 本示例来源于微信公众号「图绘科研」的原创教程
 % 《图绘科研｜MATLAB科研绘图：土地利用转移桑基图绘制教程》，作者为 QDY

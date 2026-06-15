@@ -1,8 +1,4 @@
-% sankey demo13 : Set link label format
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo13 : Set link label format
 
 figure('Name','sankey demo13','Units','normalized','Position',[.05,.2,.5,.56])
 

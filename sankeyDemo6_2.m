@@ -1,9 +1,5 @@
-% sankey demo6_2 : chord diagram
+%%  sankey demo6_2 : chord diagram_2
 % Flowing towards itself
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
 
 % 【更新部分 1】改了一些数值令流入大于流出
 % 【Update  1】Changed some values to make inflow greater than outflow

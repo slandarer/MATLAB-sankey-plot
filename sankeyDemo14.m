@@ -1,8 +1,4 @@
-% sankey demo14 : Add nodes
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo14 : Add nodes
 
 figure('Name','sankey demo14','Units','normalized','Position',[.05,.2,.5,.56])
 

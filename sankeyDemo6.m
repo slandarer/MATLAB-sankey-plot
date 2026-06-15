@@ -1,8 +1,5 @@
-% sankey demo6 : chord diagram
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo6 : chord diagram
+
 
 links={'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
        'b1','B',.4; 'b2','B',1;'b3','B',1; 'c1','C',1;

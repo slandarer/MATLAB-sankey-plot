@@ -1,8 +1,4 @@
-% sankey demo16 : Layer adjMat to global adjMat
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo16 : Layer adjMat to global adjMat
 
 figure('Name','sankey demo16', 'Units','normalized', 'Position',[.05,.2,.5,.56])
 

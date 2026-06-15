@@ -1,8 +1,4 @@
-% sankey demo7 
-% -----------------------
-% @author : slandarer
-% 公众号  : slandarer随笔
-% 知乎    : slandarer
+%% sankey demo7 : A website example
 
 figure('Name','sankey demo7','Units','normalized','Position',[.05,.2,.5,.56])
 
