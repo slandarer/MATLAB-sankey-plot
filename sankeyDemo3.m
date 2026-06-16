@@ -7,10 +7,10 @@ links={'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
        'c2','C',1;  'c3','C',1;'A','AA',2; 'A','BB',1.2;
        'B','BB',1.5; 'B','AA',1.5; 'C','BB',2.3; 'C','AA',1.2};
 
-% 创建桑基图对象(Create a Sankey diagram object)
+% Create a Sankey diagram object (创建桑基图对象)
 SK=SSankey(links(:,1),links(:,2),links(:,3));
 
-% 设置颜色(Set color)
+% Set color (设置颜色)
 SK.ColorList=[0.46, 0.54, 0.46;
     0.54, 0.68, 0.46;
     0.41, 0.49, 0.36;
@@ -26,7 +26,7 @@ SK.ColorList=[0.46, 0.54, 0.46;
     0.89, 0.91, 0.53;
     0.93, 0.56, 0.25;];
 
-% 开始绘图(Start drawing)
+% Start drawing (开始绘图)
 SK.draw()
 
 %% 
@@ -37,13 +37,11 @@ links={'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
        'c2','C',1;  'c3','C',1;'A','AA',2; 'A','BB',1.2;
        'B','BB',1.5; 'B','AA',1.5; 'C','BB',2.3; 'C','AA',1.2};
 
-% 创建桑基图对象(Create a Sankey diagram object)
+% Create a Sankey diagram object (创建桑基图对象)
 SK=SSankey(links(:,1),links(:,2),links(:,3));
 
-% 设置颜色(Set color)
+% Set color (设置颜色)
 SK.ColorList(3,:)=[0,0,0];
 
-% 开始绘图(Start drawing)
+% Start drawing (开始绘图)
 SK.draw()
-
-

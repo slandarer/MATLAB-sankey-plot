@@ -7,15 +7,16 @@ links={'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
        'c2','C',1;  'c3','C',1;'A','AA',2; 'A','BB',1.2;
        'B','BB',1.5; 'B','AA',1.5; 'C','BB',2.3; 'C','AA',1.2};
 
-% 创建桑基图对象(Create a Sankey diagram object)
+% Create a Sankey diagram object (创建桑基图对象)
 SK=SSankey(links(:,1),links(:,2),links(:,3));
 
-% 设置方块占比(Set the scale of blocks)
+% Set the scale of blocks (设置方块占比)
 % BlockScale>0 & BlockScale<1
 SK.BlockScale=.4;
 
-% 设置缝隙占比(Separation distance proportion)
+% Set separation distance proportion (设置缝隙占比)
 SK.Sep=.4;
 
-% 开始绘图(Start drawing)
+
+% Start drawing (开始绘图)
 SK.draw()

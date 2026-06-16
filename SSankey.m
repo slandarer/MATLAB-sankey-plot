@@ -21,14 +21,8 @@ classdef SSankey < handle
 %
 %   SS = SS.draw(); renders the Sankey diagram.
 %   渲染桑基图对象。
-% =========================================================================
-% Copyright (c) 2023-2026, Zhaoxu Liu / slandarer
-% -------------------------------------------------------------------------
-% Zhaoxu Liu / slandarer (2026). sankey plot 
-% (https://www.mathworks.com/matlabcentral/fileexchange/128679-sankey-plot), 
-% MATLAB Central File Exchange. Retrieved May 19, 2026.
-% =========================================================================
-% % Basic usage (基本用法)
+%
+% Basic usage (基本用法)
 %
 %     links = {'a1','A',1.2;   'a2','A',1;  'a1','B',.6;    'a3','A',1; 'a3','C',.5;
 %               'b1','B',.4;   'b2','B',1;   'b3','B',1;    'c1','C',1;
@@ -41,7 +35,7 @@ classdef SSankey < handle
 %     % Start drawing (开始绘图)
 %     SK.draw()
 % 
-% % Basic usage - AdjMat (邻接矩阵用法)
+% Basic usage - AdjMat (邻接矩阵用法)
 % 
 %     % Define inter-layer adjacency matrices (定义层间邻接矩阵)
 %     A12 = [1, 2, 1; 1, 2, 3; 2, 0, 1];
@@ -57,62 +51,88 @@ classdef SSankey < handle
 
 
 % =========================================================================
-% # update 2.0.0(2024-02-04)
+% Copyright (c) 2023-2026, Zhaoxu Liu / slandarer
+% -------------------------------------------------------------------------
+% Zhaoxu Liu / slandarer (2026). sankey plot 
+% (https://www.mathworks.com/matlabcentral/fileexchange/128679-sankey-plot), 
+% MATLAB Central File Exchange. Retrieved May 19, 2026.
+% =========================================================================
+
+
+% =========================================================================
+% Version History (版本更新)
+% =========================================================================
+% # version 2.0.0
 % see natureSankeyDemo1.m
 %
-% + 层向右对齐(Align layers to the right)
+% + Align layers to the right (层向右对齐)
 %   try : obj.LayerOrder='reverse';
 %
-% + 单独调整每层间隙大小(Adjust the Sep size of each layer separately)
-%   try : obj.Sep=[.2,.06,.05,.07,.07,.08,.15];
-% =========================================================================
-% # update 3.0.0(2024-04-15)
+% + Adjust the Sep size of each layer separately (单独调整每层间隙大小)
+%   try : obj.Sep = [.2,.06,.05,.07,.07,.08,.15];
+% -------------------------------------------------------------------------
+% # version 3.0.0
 % see sankeyDemo9.m sankeyDemo10.m sankeyDemo11.m
 % 
-% + 通过邻接矩阵创建桑基图(Creating a Sankey diagram through adjacency matrix)
+% + Creating a Sankey diagram through adjacency matrix
+%   (通过邻接矩阵创建桑基图)
 %   method 1 :
-%     SK=SSankey([],[],[],'AdjMat',adjMat);
+%     SK = SSankey([], [], [], 'AdjMat',adjMat);
 %   method 2 :
-%     SK=SSankey([],[],[],'NodeList',nodeList,'AdjMat',adjMat)
+%     SK = SSankey([], [], [], 'NodeList',nodeList, 'AdjMat',adjMat)
 %   method 3 :
-%     SK=SSankey([],[],[]);
-%     SK.AdjMat=adjMat;
+%     SK = SSankey([], [], []);
+%     SK.AdjMat = adjMat;
 % 
 %   try : 
-%     adjMat=zeros(10,10);
-%     layerNum=[3,3,2,2];
-%     layerInd=cumsum([0,layerNum]);
-%     for i=1:length(layerInd)-2
-%         adjMat(layerInd(i)+1:layerInd(i+1),layerInd(i+1)+1:layerInd(i+2))=randi([1,6],[layerNum([i,i+1])]);
-%     end
-%     disp(adjMat)
+%     adjMat=[0,0,0,1,2,1,0,0,0,0;
+%             0,0,0,1,2,3,0,0,0,0;
+%             0,0,0,2,0,1,0,0,0,0;
+%             0,0,0,0,0,0,1,4,0,0;
+%             0,0,0,0,0,0,2,1,0,0;
+%             0,0,0,0,0,0,0,3,0,0;
+%             0,0,0,0,0,0,0,0,1,5;
+%             0,0,0,0,0,0,0,0,2,3;
+%             0,0,0,0,0,0,0,0,0,0;
+%             0,0,0,0,0,0,0,0,0,0];
+%     nodeList = compose('C%d',1:10);
+%
+%     % Create a Sankey diagram object and draw (创建桑基图对象并绘制)
 %     SK=SSankey([],[],[],'NodeList',nodeList,'AdjMat',adjMat);
 %     SK.draw()
 %
-% + 每层情况可被设置(Each layer state can be set)
+% + Each layer state can be set (每层情况可被设置)
 %   try : obj.Layer = [1,1,1, 2,2,2, 3,3, 4,4,...];
 % 
-% + 每个节点可在x方向上位移(Each node can be displaced in the x-direction)
+% + Each node can be displaced in the x-direction (每个节点可在 x 方向上位移)
 %   try : obj.moveBlockX(n,dx)
-% =========================================================================
-% # update 3.1.0(2024-05-15)
+% -------------------------------------------------------------------------
+% # version 3.1.0
 % see sankeyDemo12.m sankeyDemo13.m
-% + 为链接添加显示数值的文本(Display value labels for each link)
+% + Display value labels for each link (为链接添加显示数值的文本)
 %   try : SK.ValueLabelLocation='left';
-% =========================================================================
-% # update 4.0.0(2024-05-17)
+% -------------------------------------------------------------------------
+% # version 4.0.0
 % see sankeyDemo14.m sankeyDemo15.m
-% + 增添节点及链接(Add node and link)
+% + Add node and link (增添节点及链接)
 %   try : obj.addNode(name,layer)
 %   try : obj.addLink(source,target,value)
-% =========================================================================
+% -------------------------------------------------------------------------
 % # version 5.0.0
-% + 左键添加数据提示框，右键隐藏高亮 
-%   Left-click to add data tooltip, right-click to hide highlight
-% =========================================================================
+% + Left-click to add data tooltip, right-click to hide highlight
+%   (左键添加数据提示框，右键隐藏高亮)
+% -------------------------------------------------------------------------
 % # version 5.1.0
-% + 调整每一层标签位置(Set label location for each layer)
+% + Set label location for each layer (调整每一层标签位置)
 %   try : obj.setLabelLocation(1, 'left')
+% -------------------------------------------------------------------------
+% # version 6.0.0
+% + The globalAdj = mergeAdjMat(layerAdj) 
+%     function is introduced to create global adjacency matrices. 
+% -------------------------------------------------------------------------
+% # version 6.1.0
+% + Added 'justify' vertical alignment (新增方块竖直方向两端对齐)
+%   try : obj.Align = 'justify'
 
     properties
         ax;                                  % Axes handle (坐标区句柄)
@@ -144,7 +164,7 @@ classdef SSankey < handle
         % Rendering options (渲染选项)
         RenderingMethod = 'interp';          % 'left'/'right'/'interp'/'map'/'simple'
         LabelLocation = 'left';              % 'left'/'right'/'top'/'center'/'bottom' (标签位置)
-        Align = 'center';                    % 'up'/'down'/'center' (垂直对齐方式)
+        Align = 'center';                    % 'up'/'down'/'center'/'justify' (垂直对齐方式)
         BlockScale = 0.05;                   % Block width factor (块宽度因子) > 0
         Sep = 0.05;                          % Gap between blocks (块间间隙) >= 0
         ValueLabelLocation = 'none';         % 'left'/'right'/'center'/'none' (数值标签位置)
@@ -173,10 +193,11 @@ classdef SSankey < handle
         % Internal state (内部状态)
         BN; LN; VN;                          % Number of nodes, layers, links (节点数、层数、连接数)
         TotalLen; SepLen;                    % Total block length and separation length (总块长度、间隔长度)
+        SepLenJustifyAlign
     end
 
     % Shorthands / alias
-    properties (Dependent)
+    properties (Dependent, Hidden)
         CData % ColorList
         BlockHdl;
         LinkHdl;
@@ -278,14 +299,14 @@ classdef SSankey < handle
             obj.linkHdl = gobjects(1, obj.VN);
             obj.valueLabelHdl = gobjects(1, obj.VN);
             for i = 1:obj.VN
-                obj.drawLink(i)
+                obj.drawLink(i, true)
             end
             
             % Draw nodes on top (再绘制方块)
             obj.blockHdl = gobjects(1, obj.BN);
             obj.labelHdl = gobjects(1, obj.BN);
             for i = 1:obj.BN
-                drawNode(obj, i)
+                obj.drawNode(i)
             end
             try
                 axis(obj.ax, 'tight');
@@ -370,10 +391,17 @@ classdef SSankey < handle
                     obj.Layer(end + 1) = layer;
                 end
             end
+            obj.LN = max(obj.Layer);
             
             % Add default color and position (添加默认颜色和位置)
             obj.ColorList(end + 1, :) = rand(1, 3) * 0.7;
             obj.MovePos(end + 1, :) = 0;
+
+            if length(obj.Sep) > 1
+                tSep = obj.Sep(end).*ones(1, obj.LN);
+                tSep(1:length(obj.Sep)) = obj.Sep;
+                obj.Sep = tSep;
+            end
             
             % Redraw if already rendered (若已渲染则重绘)
             if ~isempty(obj.blockHdl)
@@ -465,7 +493,7 @@ classdef SSankey < handle
 % =========================================================================
 % Link drawing (连接绘制)
 % =========================================================================
-        function drawLink(obj, n)
+    function drawLink(obj, n, init)
             [obj.SourceInd, obj.TargetInd] = find(obj.AdjMat ~= 0);
             tSource = obj.SourceInd(n);
             tTarget = obj.TargetInd(n);
@@ -516,38 +544,65 @@ classdef SSankey < handle
             end
             
             % Create link surface (创建连接曲面)
-            tLinkHdl = surf(obj.ax, XX, YY, XX .* 0, 'EdgeColor', 'none', 'FaceAlpha', 0.3, ...
-                'CData', MeshC, 'UserData', n, 'ButtonDownFcn', @obj.onLinkClick);
-            obj.linkHdl = [obj.linkHdl(1:n-1), tLinkHdl, obj.linkHdl(n:end)];
+            if nargin == 3
+                obj.linkHdl(n) = surf(obj.ax, XX, YY, XX .* 0, 'EdgeColor', 'none', 'FaceAlpha', 0.3, ...
+                    'CData', MeshC, 'UserData', [obj.SourceInd(n), obj.TargetInd(n)], 'ButtonDownFcn', @obj.onLinkClick);
+            else
+                tLinkHdl = surf(obj.ax, XX, YY, XX .* 0, 'EdgeColor', 'none', 'FaceAlpha', 0.3, ...
+                    'CData', MeshC, 'UserData', [obj.SourceInd(n), obj.TargetInd(n)], 'ButtonDownFcn', @obj.onLinkClick);
+                obj.linkHdl = [obj.linkHdl(1:n-1), tLinkHdl, obj.linkHdl(n:end)];
+            end
             
             % Create value label (创建数值标签)
-            switch obj.ValueLabelLocation
-                case 'left'
-                    tValueLabelHdl = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
-                        [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
-                        'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left');
-                case 'right'
-                    tValueLabelHdl = text(obj.ax, obj.LayerPos(tTarget, 1), tT1/2 + tT2/2, ...
-                        [obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n))), ' '], ...
-                        'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'right');
-                case 'center'
-                    tValueLabelHdl = text(obj.ax, obj.LayerPos(tSource, 2)/2 + obj.LayerPos(tTarget, 1)/2, ...
-                        tS1/4 + tS2/4 + tT1/4 + tT2/4, ...
-                        obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n))), ...
-                        'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'center');
-                case 'none'
-                    tValueLabelHdl = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
-                        [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
-                        'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left', 'Visible', 'off');
+            if nargin < 3
+                switch obj.ValueLabelLocation
+                    case 'left'
+                        obj.valueLabelHdl(n) = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
+                            [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left');
+                    case 'right'
+                        obj.valueLabelHdl(n) = text(obj.ax, obj.LayerPos(tTarget, 1), tT1/2 + tT2/2, ...
+                            [obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n))), ' '], ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'right');
+                    case 'center'
+                        obj.valueLabelHdl(n) = text(obj.ax, obj.LayerPos(tSource, 2)/2 + obj.LayerPos(tTarget, 1)/2, ...
+                            tS1/4 + tS2/4 + tT1/4 + tT2/4, ...
+                            obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n))), ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'center');
+                    case 'none'
+                        obj.valueLabelHdl(n) = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
+                            [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left', 'Visible', 'off');
+                end
+            else
+                switch obj.ValueLabelLocation
+                    case 'left'
+                        tValueLabelHdl = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
+                            [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left');
+                    case 'right'
+                        tValueLabelHdl = text(obj.ax, obj.LayerPos(tTarget, 1), tT1/2 + tT2/2, ...
+                            [obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n))), ' '], ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'right');
+                    case 'center'
+                        tValueLabelHdl = text(obj.ax, obj.LayerPos(tSource, 2)/2 + obj.LayerPos(tTarget, 1)/2, ...
+                            tS1/4 + tS2/4 + tT1/4 + tT2/4, ...
+                            obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n))), ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'center');
+                    case 'none'
+                        tValueLabelHdl = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
+                            [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))], ...
+                            'FontSize', 12, 'FontName', 'Times New Roman', 'HorizontalAlignment', 'left', 'Visible', 'off');
+                end
+                obj.valueLabelHdl = [obj.valueLabelHdl(1:n-1), tValueLabelHdl, obj.valueLabelHdl(n:end)];
             end
-            obj.valueLabelHdl = [obj.valueLabelHdl(1:n-1), tValueLabelHdl, obj.valueLabelHdl(n:end)];
         end
 
 
 % =========================================================================
 % Node drawing (节点绘制)
 % =========================================================================
-        function drawNode(obj, n)
+    function drawNode(obj, n)
             % Draw node block (绘制方块)
             obj.blockHdl(n) = fill(obj.ax, obj.LayerPos(n, [1, 2, 2, 1]), ...
                 obj.LayerPos(n, [3, 3, 4, 4]), obj.ColorList(n, :), 'EdgeColor', 'none');
@@ -623,12 +678,36 @@ classdef SSankey < handle
             obj.TotalLen = max([sum(obj.AdjMat, 1).', sum(obj.AdjMat, 2)], [], 2);
             obj.TotalLen(obj.TotalLen == 0) = mean(obj.TotalLen) / 2;
             obj.SepLen = max(obj.TotalLen) .* obj.Sep;
+
+            if strcmpi(obj.Align, 'justify')
+                layerSize = 1:obj.LN;
+                layerLen  = 1:obj.LN;
+                for i = 1:obj.LN
+                    layerSize(i) = sum(obj.Layer == i);
+                    layerLen(i) = sum(obj.TotalLen(obj.Layer == i));
+                end
+                tSepLen = obj.SepLen(end).*ones(1, obj.LN);
+                tSepLen(1:length(obj.SepLen)) = obj.SepLen;
+                layerLenFull = layerLen + (layerSize - 1).*tSepLen;
+                [layerLenMax, tInd] = max(layerLenFull);
+                sepLenBoth = (layerLenMax - layerLen)./(layerSize - 1);
+                sepLenBoth(isnan(sepLenBoth)) = 1;
+                sepLenBoth(isinf(sepLenBoth)) = 1;
+                sepLenBoth(sepLenBoth < 0) = 1;
+                obj.SepLenJustifyAlign = tSepLen(tInd)./sepLenBoth(tInd).*sepLenBoth;
+                if any(isnan(obj.SepLenJustifyAlign))
+                    obj.SepLenJustifyAlign = sepLenBoth;
+                end
+            end
             obj.LayerPos = zeros(obj.BN, 4);
             
             for i = 1:obj.LN
                 tBlockInd = find(obj.Layer == i);
                 tBlockLen = [0; cumsum(obj.TotalLen(tBlockInd))];
                 sepVal = obj.SepLen(min(i, length(obj.Sep)));
+                if strcmpi(obj.Align, 'justify')
+                    sepVal = obj.SepLenJustifyAlign(i);
+                end
                 tY1 = tBlockLen(1:end-1) + (0:length(tBlockInd)-1).' .* sepVal;
                 tY2 = tBlockLen(2:end)   + (0:length(tBlockInd)-1).' .* sepVal;
                 obj.LayerPos(tBlockInd, 3) = tY1;
@@ -645,9 +724,13 @@ classdef SSankey < handle
                 tBlockInd = find(obj.Layer == i);
                 tBlockPos3 = obj.LayerPos(tBlockInd, 3);
                 tBlockPos4 = obj.LayerPos(tBlockInd, 4);
-                switch obj.Align
+                switch lower(obj.Align)
                     case 'up'
                         % No adjustment (无需调整)
+                    case 'justify'
+                        shift = min(tBlockPos3)/2 - max(tBlockPos4)/2 + tMinY/2 - tMaxY/2;
+                        obj.LayerPos(tBlockInd, 3) = obj.LayerPos(tBlockInd, 3) + shift;
+                        obj.LayerPos(tBlockInd, 4) = obj.LayerPos(tBlockInd, 4) + shift;
                     case 'down'
                         obj.LayerPos(tBlockInd, 3) = obj.LayerPos(tBlockInd, 3) + tMaxY - max(tBlockPos4);
                         obj.LayerPos(tBlockInd, 4) = obj.LayerPos(tBlockInd, 4) + tMaxY - max(tBlockPos4);
@@ -796,11 +879,17 @@ classdef SSankey < handle
             end
         end
     end
+end
 
+
+% ========================================================================= 
 % Copyright (c) 2023-2026, Zhaoxu Liu / slandarer
-% =========================================================================
+% -------------------------------------------------------------------------
 % @author : slandarer
 % 公众号  : slandarer随笔
 % 知乎    : slandarer
 % -------------------------------------------------------------------------
-end
+% Zhaoxu Liu / slandarer (2026). sankey plot 
+% (https://www.mathworks.com/matlabcentral/fileexchange/128679-sankey-plot), 
+% MATLAB Central File Exchange. Retrieved May 19, 2026.
+% ========================================================================= 

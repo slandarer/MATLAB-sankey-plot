@@ -16,11 +16,11 @@ adjMat=[0,0,0,1,2,1,0,0,0,0;
 nodeList=compose('C%d',1:10);
 layer=[1,1,2,4,4,3,6,6,7,7];
 
-% 创建桑基图对象(Create a Sankey diagram object)
+% Create a Sankey diagram object (创建桑基图对象)
 SK=SSankey([],[],[],'NodeList',nodeList,'AdjMat',adjMat,'Layer',layer);
 % SK.Layer = layer;
 
-% 开始绘图(Start drawing)
+% Start drawing (开始绘图)
 SK.draw()
 
 SK.moveBlockY(3,-10)

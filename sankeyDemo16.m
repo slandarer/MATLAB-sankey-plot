@@ -14,4 +14,5 @@ adjMat = mergeAdjMat({A12, A23, A34});
 
 SK = SSankey([],[],[], 'AdjMat',adjMat);
 SK.NodeList = {'A','B','C','A','B','C','A','B','A','B'};
+
 SK.draw()

@@ -42,26 +42,26 @@ SK.NodeList={'浏览1','浏览2','浏览3','浏览4','浏览5','浏览6','浏览
 SK.ColorList=[197,141,91;69,168,134;114,191,220;193,135,146;242,132,98;249,190,89;207,202,100;171,203,110;
               repmat([114,158,158],[7,1]);repmat([100,136,177],[7,1])]./255;
 
-% 修改对齐方式(Set alignment)
+% Set alignment (修改对齐方式)
 % 'up'/'down'/'center'(default)
 SK.Align='down';
 
-% 修改链接颜色渲染方式(Set link color rendering method)
+% Set link color rendering method (修改链接颜色渲染方式)
 % 'left'/'right'/'interp'(default)/'map'/'simple'
 SK.RenderingMethod='left'; 
 
-% 修改文本位置(Set Text Location)
+% Set Text Location (修改文本位置)
 % 'left'(default)/'right'/'top'/'center'/'bottom'
 SK.LabelLocation='right';
 
-% 设置方块占比(Set the scale of blocks)
+% Set the scale of blocks (设置方块占比)
 % BlockScale>0 & BlockScale<1
 SK.BlockScale=.16;
 
-% 开始绘图(Start drawing)
+% Start drawing (开始绘图)
 SK.draw()
 
-% 循环设置标签属性(Loop Set Label Properties)
+% Loop Set Label Properties (循环设置标签属性)
 for i=1:22
     SK.setLabel(i,'FontName','宋体','FontSize',12)
 end

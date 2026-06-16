@@ -25,7 +25,6 @@ SK.RenderingMethod='left';
 
 % 修改对齐方式(Set alignment)
 SK.Align='up';
-
 % 设置缝隙占比(Separation distance proportion)
 SK.Sep=.2;
 
