@@ -49,7 +49,6 @@ classdef SSankey < handle
 %     SK.draw()
 
 
-
 % =========================================================================
 % Copyright (c) 2023-2026, Zhaoxu Liu / slandarer
 % -------------------------------------------------------------------------
@@ -130,7 +129,10 @@ classdef SSankey < handle
 % + The globalAdj = mergeAdjMat(layerAdj) 
 %     function is introduced to create global adjacency matrices. 
 % -------------------------------------------------------------------------
-% # version 6.1.0
+% # version 7.0.0
+% + Optimized variable and graphics object name display
+% -------------------------------------------------------------------------
+% # version 7.1.0
 % + Added 'justify' vertical alignment (新增方块竖直方向两端对齐)
 %   try : obj.Align = 'justify'
 
