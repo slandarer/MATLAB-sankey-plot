@@ -13,20 +13,42 @@ SK=SSankey(links(:,1),links(:,2),links(:,3));
 % Start drawing (开始绘图)
 SK.draw()
 
-% Set Block Properties (设置方块属性)
-SK.setBlock(2,'EdgeColor',[0,0,0],'LineWidth',6)
+% As of SSankey version 8.0.0 and later, 
+% the set function can be used directly 
+% to set properties for multiple handles in batch.
 
-% Loop Set Block Properties (循环设置方块属性)
-for i=1:14
-    SK.setBlock(i,'FaceColor',[.5,.5,.5])
-end
+% Set Block Properties (设置方块属性)
+set(SK.blockHdl(2), 'EdgeColor',[0,0,0],'LineWidth',6)
+
+% Batch setting of block properties
+set(SK.blockHdl, 'FaceColor',[.5,.5,.5])
 
 % Set Link Properties (设置连接属性)
-SK.setLink(5,'FaceColor',[0,0,0],'FaceAlpha',.5)
+set(SK.linkHdl(5), 'FaceColor',[0,0,0],'FaceAlpha',.5)
 
 % Set Label Properties (设置标签属性)
-SK.setLabel(11,'FontSize',40,'Color',[0,0,.8])
+set(SK.labelHdl(11), 'FontSize',40,'Color',[0,0,.8])
 
 title(gca,'sankey plot by slandarer','FontSize',30,'FontName','Cambria')
+
+
+
+
+% % Set Block Properties (设置方块属性)
+% SK.setBlock(2,'EdgeColor',[0,0,0],'LineWidth',6)
+% 
+% 
+% % Loop Set Block Properties (循环设置方块属性)
+% for i=1:14
+%     SK.setBlock(i,'FaceColor',[.5,.5,.5])
+% end
+% 
+% % Set Link Properties (设置连接属性)
+% SK.setLink(5,'FaceColor',[0,0,0],'FaceAlpha',.5)
+% 
+% % Set Label Properties (设置标签属性)
+% SK.setLabel(11,'FontSize',40,'Color',[0,0,.8])
+% 
+% title(gca,'sankey plot by slandarer','FontSize',30,'FontName','Cambria')
 
 

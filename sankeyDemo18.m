@@ -7,6 +7,7 @@
 
 % 本示例来源于: 代号鸢黄月英
 
+figure('Name','sankey demo18', 'Units','normalized', 'Position',[.05,.2,.6,.6])
 % 定义状态转移矩阵 (Define transition matrix S)
 S = [0, .4, .0; 
      0, .0, .6; 

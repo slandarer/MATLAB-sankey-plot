@@ -27,3 +27,4 @@ SK.addNode()
 % Start drawing (开始绘图)
 SK.draw()
 SK.addNode('Add3',5)
+

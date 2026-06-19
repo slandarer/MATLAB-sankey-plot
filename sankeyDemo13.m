@@ -34,7 +34,8 @@ SK.setLabelLocation(4, 'right')
 SK.moveBlockY(10,+6);
 
 % Set link label font (修改链接字体)
-for i=1:19
-    SK.setValueLabel(i,'Color',[0,0,.8])
-end
+set(SK.valueLabelHdl(1:19), 'Color',[0,0,.8])
+% for i=1:19
+%     SK.setValueLabel(i,'Color',[0,0,.8])
+% end
 

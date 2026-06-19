@@ -135,14 +135,29 @@ classdef SSankey < handle
 % # version 7.1.0
 % + Added 'justify' vertical alignment (新增方块竖直方向两端对齐)
 %   try : obj.Align = 'justify'
+% -------------------------------------------------------------------------
+% # version 8.0.0
+% + Added LinkType property to specify the interpolation method for link curves,
+%   supporting 'pchip' (default), 'linear', 'bezier', 'makima', and 'spline'.
+%   try : obj.LinkType = 'pchip';
+%
+% + Added LinkGridSize property to control the number of sampling points along the
+%   link path (X-direction) and across the link width (Y-direction), with default [100, 20].
+%   try : obj.LinkGridSize = [200, 50];
+%
+% + Added rotateSankey function to convert the diagram from horizontal to vertical
+%   layout by swapping X/Y coordinates of all objects and setting YDir to 'reverse'.
+%   try : rotateSankey(obj);
 
     properties
         ax;                                  % Axes handle (坐标区句柄)
         Parent;                              % Parent axes (父容器)
 
         % Parameter list for name-value pair parsing (参数解析列表)
-        arginList = {'RenderingMethod', 'LabelLocation', 'ValueLabelLocation', 'BlockScale', 'Layer', ...
-            'Sep', 'Align', 'ColorList', 'Parent', 'NodeList', 'AdjMat'}
+        arginList = {'Parent', 'AdjMat', 'Layer', ...
+                     'ColorList','RenderingMethod', 'LinkType', ...
+                     'NodeList', 'LabelLocation', 'ValueLabelLocation', ...
+                     'BlockScale', 'Sep', 'Align'}
 
         % Core data (核心数据)
         Source; Target; Value;               % Source, target, and flow value (源、目标、流量值)
@@ -169,8 +184,12 @@ classdef SSankey < handle
         Align = 'center';                    % 'up'/'down'/'center'/'justify' (垂直对齐方式)
         BlockScale = 0.05;                   % Block width factor (块宽度因子) > 0
         Sep = 0.05;                          % Gap between blocks (块间间隙) >= 0
+        LinkType = 'pchip';                  % 'pchip'/'linear'/'bezier'/'makima'/'spline'
+        LinkGridSize = [100, 20]             %  [X-direction sampling points number, ...
+                                             %   Y-direction sampling points number]
         ValueLabelLocation = 'none';         % 'left'/'right'/'center'/'none' (数值标签位置)
         ValueLabelFormat = @(X) num2str(X);  % Value formatting function (数值格式化函数)
+        
         
         
         % Node properties (节点属性)
@@ -281,7 +300,12 @@ classdef SSankey < handle
 % =========================================================================
 % Main drawing method (主绘图方法)
 % =========================================================================
-        function draw(obj)      
+        function draw(obj)   
+            
+            obj.LinkGridSize = round(obj.LinkGridSize);
+            if obj.LinkGridSize(1) < 20, obj.LinkGridSize(1) = 20; end
+            if obj.LinkGridSize(2) < 2,  obj.LinkGridSize(2) = 2;  end
+
             % Generate adjacency matrix (生成邻接矩阵)
             obj.getAdjMat()
             
@@ -365,7 +389,7 @@ classdef SSankey < handle
             
             % Set node name (设置节点名称)
             if nargin < 2
-                obj.NodeList{end + 1} = compose('node%d', size(obj.AdjMat, 1));
+                obj.NodeList{end + 1} = ['node', num2str(size(obj.AdjMat, 1))];
             else
                 obj.NodeList{end + 1} = name;
             end
@@ -467,15 +491,9 @@ classdef SSankey < handle
                 if isempty(tS1), tS1 = 0; end
                 if isempty(tT1), tT1 = 0; end
                 
-                tX = [tLayerPos(tSource, 1), tLayerPos(tSource, 2), tLayerPos(tTarget, 1), tLayerPos(tTarget, 2)];
-                qX = linspace(tLayerPos(tSource, 1), tLayerPos(tTarget, 2), 200);
-                qT = linspace(0, 1, 50);
+                [XX, YY] = obj.getLinkData(tSource, tTarget, tS1, tS2, tT1, tT2);
                 
-                qY1 = interp1(tX, [tS1, tS1, tT1, tT1], qX, 'pchip');
-                qY2 = interp1(tX, [tS2, tS2, tT2, tT2], qX, 'pchip');
-                YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
-                
-                set(obj.linkHdl(n), 'YData', YY, 'XData', qX);
+                set(obj.linkHdl(n), 'YData', YY, 'XData', XX);
                 set(obj.valueLabelHdl(n), 'String', [' ', obj.ValueLabelFormat(obj.AdjMat(obj.SourceInd(n), obj.TargetInd(n)))]);
                 
                 switch obj.ValueLabelLocation
@@ -508,22 +526,10 @@ classdef SSankey < handle
             if isempty(tS1), tS1 = 0; end
             if isempty(tT1), tT1 = 0; end
             
-            tX = [obj.LayerPos(tSource, 1), obj.LayerPos(tSource, 2), obj.LayerPos(tTarget, 1), obj.LayerPos(tTarget, 2)];
-            if abs(tX(1) - tX(3)) < eps
-                warning('Currently, flow between the same layer is not supported.');
-            end
-            
-            qX = linspace(obj.LayerPos(tSource, 1), obj.LayerPos(tTarget, 2), 200);
-            qT = linspace(0, 1, 50);
-            
-            qY1 = interp1(tX, [tS1, tS1, tT1, tT1], qX, 'pchip');
-            qY2 = interp1(tX, [tS2, tS2, tT2, tT2], qX, 'pchip');
-            
-            XX = repmat(qX, [50, 1]);
-            YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
+            [XX, YY] = obj.getLinkData(tSource, tTarget, tS1, tS2, tT1, tT2);
             
             % Color mapping (颜色映射)
-            MeshC = ones(50, 200, 3);
+            MeshC = ones(obj.LinkGridSize(2), obj.LinkGridSize(1), 3);
             switch obj.RenderingMethod
                 case 'left'
                     MeshC(:, :, 1) = MeshC(:, :, 1) .* obj.ColorList(tSource, 1);
@@ -534,9 +540,9 @@ classdef SSankey < handle
                     MeshC(:, :, 2) = MeshC(:, :, 2) .* obj.ColorList(tTarget, 2);
                     MeshC(:, :, 3) = MeshC(:, :, 3) .* obj.ColorList(tTarget, 3);
                 case 'interp'
-                    MeshC(:, :, 1) = repmat(linspace(obj.ColorList(tSource, 1), obj.ColorList(tTarget, 1), 200), [50, 1]);
-                    MeshC(:, :, 2) = repmat(linspace(obj.ColorList(tSource, 2), obj.ColorList(tTarget, 2), 200), [50, 1]);
-                    MeshC(:, :, 3) = repmat(linspace(obj.ColorList(tSource, 3), obj.ColorList(tTarget, 3), 200), [50, 1]);
+                    MeshC(:, :, 1) = repmat(linspace(obj.ColorList(tSource, 1), obj.ColorList(tTarget, 1), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
+                    MeshC(:, :, 2) = repmat(linspace(obj.ColorList(tSource, 2), obj.ColorList(tTarget, 2), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
+                    MeshC(:, :, 3) = repmat(linspace(obj.ColorList(tSource, 3), obj.ColorList(tTarget, 3), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
                 case 'map'
                     MeshC = MeshC(:, :, 1) .* obj.Value{n};
                 case 'simple'
@@ -556,7 +562,7 @@ classdef SSankey < handle
             end
             
             % Create value label (创建数值标签)
-            if nargin < 3
+            if nargin == 3
                 switch obj.ValueLabelLocation
                     case 'left'
                         obj.valueLabelHdl(n) = text(obj.ax, obj.LayerPos(tSource, 2), tS1/2 + tS2/2, ...
@@ -744,6 +750,48 @@ classdef SSankey < handle
             end
         end
 
+        function pnts = bezierCurve(~, pnts, N)
+            t = linspace(0, 1, N);
+            p = size(pnts, 1) - 1;
+            coe1 = factorial(p) ./ factorial(0:p) ./ factorial(p:-1:0);
+            coe2 = ((t) .^ ((0:p)')) .* ((1-t) .^ ((p:-1:0)'));
+            pnts = (pnts' * (coe1' .* coe2))';
+        end
+
+        function [XX, YY] = getLinkData(obj, S, T, S1, S2, T1, T2)
+            tLayerPos = obj.MovePos + obj.LayerPos;
+            tX = [tLayerPos(S, 1), tLayerPos(S, 2), tLayerPos(T, 1), tLayerPos(T, 2)];
+            if abs(tX(1) - tX(3)) < eps
+                warning('Currently, flow between the same layer is not supported.');
+            end
+
+            qX = linspace(tLayerPos(S, 2), tLayerPos(T, 1), obj.LinkGridSize(1));
+            qT = linspace(0, 1, obj.LinkGridSize(2));
+
+            switch lower(obj.LinkType)
+                case {'pchip', 'makima', 'spline'}
+                    qY1 = interp1(tX, [S1, S1, T1, T1], qX, lower(obj.LinkType));
+                    qY2 = interp1(tX, [S2, S2, T2, T2], qX, lower(obj.LinkType));
+                case 'linear'
+                    qY1 = linspace(S1, T1, obj.LinkGridSize(1));
+                    qY2 = linspace(S2, T2, obj.LinkGridSize(1));
+                case 'bezier'
+                    bX = [tLayerPos(S, 2); 
+                         (tLayerPos(S, 2) + tLayerPos(T, 1))./2;
+                         (tLayerPos(S, 2) + tLayerPos(T, 1))./2;
+                          tLayerPos(T, 1)];
+                    bY1 = [S1; S1; T1; T1];
+                    bY2 = [S2; S2; T2; T2];
+                    bXY1 = obj.bezierCurve([bX, bY1], obj.LinkGridSize(1));
+                    bXY2 = obj.bezierCurve([bX, bY2], obj.LinkGridSize(1));
+                    qX = bXY1(:, 1).';
+                    qY1 = bXY1(:, 2).'; 
+                    qY2 = bXY2(:, 2).';
+            end
+            XX = repmat(qX, [obj.LinkGridSize(2), 1]);
+            YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
+        end
+
 
 % =========================================================================
 % Node movement methods (节点移动方法)
@@ -784,16 +832,8 @@ classdef SSankey < handle
                     if isempty(tS1), tS1 = 0; end
                     if isempty(tT1), tT1 = 0; end
                     
-                    tX = [tLayerPos(tSource, 1), tLayerPos(tSource, 2), ...
-                          tLayerPos(tTarget, 1), tLayerPos(tTarget, 2)];
-                    qX = linspace(tLayerPos(tSource, 1), tLayerPos(tTarget, 2), 200);
-                    qT = linspace(0, 1, 50);
-                    
-                    qY1 = interp1(tX, [tS1, tS1, tT1, tT1], qX, 'pchip');
-                    qY2 = interp1(tX, [tS2, tS2, tT2, tT2], qX, 'pchip');
-                    YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
-                    
-                    set(obj.linkHdl(i), 'YData', YY, 'XData', qX);
+                    [XX, YY] = obj.getLinkData(tSource, tTarget, tS1, tS2, tT1, tT2);
+                    set(obj.linkHdl(i), 'YData', YY, 'XData', XX);
                     
                     switch obj.ValueLabelLocation
                         case 'left'
