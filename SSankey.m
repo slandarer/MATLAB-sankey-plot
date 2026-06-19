@@ -150,6 +150,10 @@ classdef SSankey < handle
 %   try : rotateSankey(obj);
 % -------------------------------------------------------------------------
 % # version 8.1.0
+% + Added arrow head support with properties Arrow ('on'/'off') and ArrowHeadRatio
+%   (添加箭头支持，包含 Arrow 开关和箭头头部比例)
+%   try : obj.Arrow = 'on'; 
+%         obj.ArrowHeadRatio = 0.08;
 
     properties
         ax;                                  % Axes handle (坐标区句柄)
