@@ -148,6 +148,8 @@ classdef SSankey < handle
 % + Added rotateSankey function to convert the diagram from horizontal to vertical
 %   layout by swapping X/Y coordinates of all objects and setting YDir to 'reverse'.
 %   try : rotateSankey(obj);
+% -------------------------------------------------------------------------
+% # version 8.1.0
 
     properties
         ax;                                  % Axes handle (坐标区句柄)
@@ -155,7 +157,7 @@ classdef SSankey < handle
 
         % Parameter list for name-value pair parsing (参数解析列表)
         arginList = {'Parent', 'AdjMat', 'Layer', ...
-                     'ColorList','RenderingMethod', 'LinkType', ...
+                     'ColorList','RenderingMethod', 'LinkType', 'Arrow', ...
                      'NodeList', 'LabelLocation', 'ValueLabelLocation', ...
                      'BlockScale', 'Sep', 'Align'}
 
@@ -184,6 +186,8 @@ classdef SSankey < handle
         Align = 'center';                    % 'up'/'down'/'center'/'justify' (垂直对齐方式)
         BlockScale = 0.05;                   % Block width factor (块宽度因子) > 0
         Sep = 0.05;                          % Gap between blocks (块间间隙) >= 0
+        Arrow = 'off'                        % 'on'/'off'
+        ArrowHeadRatio = 0.05;               % Arrow head ratio
         LinkType = 'pchip';                  % 'pchip'/'linear'/'bezier'/'makima'/'spline'
         LinkGridSize = [100, 20]             %  [X-direction sampling points number, ...
                                              %   Y-direction sampling points number]
@@ -283,11 +287,7 @@ classdef SSankey < handle
                 end
             end
             
-            % Initialize node colors (初始化节点颜色)
             obj.BN = length(obj.NodeList);
-            if length(obj.NodeList) > size(obj.ColorList, 1)
-                obj.ColorList = [obj.ColorList; rand(length(obj.NodeList), 3) * 0.7];
-            end
             obj.MovePos = zeros(obj.BN, 4);
             
             % Configure axes appearance (配置坐标区外观)
@@ -301,10 +301,19 @@ classdef SSankey < handle
 % Main drawing method (主绘图方法)
 % =========================================================================
         function draw(obj)   
+
+            obj.ArrowHeadRatio = abs(obj.ArrowHeadRatio);
+            if obj.ArrowHeadRatio > .2
+                obj.ArrowHeadRatio = .2;
+            end
             
             obj.LinkGridSize = round(obj.LinkGridSize);
             if obj.LinkGridSize(1) < 20, obj.LinkGridSize(1) = 20; end
             if obj.LinkGridSize(2) < 2,  obj.LinkGridSize(2) = 2;  end
+
+            if length(obj.NodeList) > size(obj.ColorList, 1)
+                obj.ColorList = [obj.ColorList; rand(length(obj.NodeList), 3) * 0.7];
+            end
 
             % Generate adjacency matrix (生成邻接矩阵)
             obj.getAdjMat()
@@ -790,6 +799,11 @@ classdef SSankey < handle
             end
             XX = repmat(qX, [obj.LinkGridSize(2), 1]);
             YY = qY1 .* (qT' .* 0 + 1) + (qY2 - qY1) .* (qT');
+
+            if strcmp(obj.Arrow, 'on')
+                YY(:, end) = (T1 + T2)./2;
+                XX(:, 1:(end - 1)) = (XX(:, 1:(end - 1)) - tLayerPos(S, 2)).*(1 - obj.ArrowHeadRatio) + tLayerPos(S, 2);
+            end
         end
 
 

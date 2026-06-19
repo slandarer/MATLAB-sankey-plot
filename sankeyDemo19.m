@@ -14,6 +14,9 @@ adjMat = mergeAdjMat(layerAdj);
 SK = SSankey([],[],[], 'AdjMat',adjMat);
 SK.Layer = repmat(1:layerNum, [layerSz, 1]);
 
-% link type : 'pchip'(default)/'linear'/'bezier'/'makima'/'spline'
-SK.LinkType = 'linear';
+% Link type : 'pchip'(default)/'linear'/'bezier'/'makima'/'spline'
+SK.LinkType = 'bezier';
+% Arrow on
+SK.Arrow = 'on';
+SK.ArrowHeadRatio = .07;
 SK.draw()
