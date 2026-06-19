@@ -195,7 +195,7 @@ classdef SSankey < handle
         Sep = 0.05;                          % Gap between blocks (块间间隙) >= 0
         Arrow = 'off'                        % 'on'/'off'
         ArrowHeadRatio = 0.05;               % Arrow head ratio
-        LinkType = 'pchip';                  % 'pchip'/'linear'/'bezier'/'makima'/'spline'/'uniform'
+        LinkType = 'pchip';                  % 'pchip'/'linear'/'bezier'/'makima'/'spline'
 
         LinkGridSize = [100, 20]             %  [X-direction sampling points number, ...
                                              %   Y-direction sampling points number]
