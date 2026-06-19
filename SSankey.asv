@@ -154,9 +154,6 @@ classdef SSankey < handle
 %   (添加箭头支持，包含 Arrow 开关和箭头头部比例)
 %   try : obj.Arrow = 'on'; 
 %         obj.ArrowHeadRatio = 0.08;
-% -------------------------------------------------------------------------
-% # version 8.2.0
-% + Added BezierRatio property to control control-point position for Bezier links
 
     properties
         ax;                                  % Axes handle (坐标区句柄)
@@ -315,11 +312,10 @@ classdef SSankey < handle
 % =========================================================================
         function draw(obj)   
 
-            if obj.BezierRatio > 1, obj.BezierRatio = 1; end
-            if obj.BezierRatio < 0, obj.BezierRatio = 0; end
-
             obj.ArrowHeadRatio = abs(obj.ArrowHeadRatio);
-            if obj.ArrowHeadRatio > .2, obj.ArrowHeadRatio = .2; end
+            if obj.ArrowHeadRatio > .2
+                obj.ArrowHeadRatio = .2;
+            end
             
             obj.LinkGridSize = round(obj.LinkGridSize);
             if obj.LinkGridSize(1) < 20, obj.LinkGridSize(1) = 20; end
@@ -800,8 +796,8 @@ classdef SSankey < handle
                     qY2 = linspace(S2, T2, obj.LinkGridSize(1));
                 case 'bezier'
                     bX = [tLayerPos(S, 2); 
-                          (1 - obj.BezierRatio)*tLayerPos(S, 2) + obj.BezierRatio*tLayerPos(T, 1);
-                          obj.BezierRatio*tLayerPos(S, 2) + (1 - obj.BezierRatio)*tLayerPos(T, 1);
+                         (0*tLayerPos(S, 2) + 3*tLayerPos(T, 1))./3;
+                         (3*tLayerPos(S, 2) + 0*tLayerPos(T, 1))./3;
                           tLayerPos(T, 1)];
                     bY1 = [S1; S1; T1; T1];
                     bY2 = [S2; S2; T2; T2];
