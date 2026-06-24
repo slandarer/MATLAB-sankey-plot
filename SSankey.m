@@ -19,7 +19,7 @@ classdef SSankey < handle
 %   after creation, before rendering.
 %   创建桑基图对象后，绘图前为其设置属性。
 %
-%   SS = SS.draw(); renders the Sankey diagram.
+%   SS.draw(); renders the Sankey diagram.
 %   渲染桑基图对象。
 %
 % Basic usage (基本用法)
