@@ -20,3 +20,6 @@ end
 for i=10:12
     SK.moveBlockX(i,(i-9)*3/10-.3)
 end
+
+
+SK.moveBlockX(10, 1.5)

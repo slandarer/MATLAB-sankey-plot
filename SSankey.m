@@ -783,12 +783,19 @@ classdef SSankey < handle
 
         function [XX, YY] = getLinkData(obj, S, T, S1, S2, T1, T2)
             tLayerPos = obj.MovePos + obj.LayerPos;
-            tX = [tLayerPos(S, 1), tLayerPos(S, 2), tLayerPos(T, 1), tLayerPos(T, 2)];
+            % tX = [tLayerPos(S, 1), tLayerPos(S, 2), tLayerPos(T, 1), tLayerPos(T, 2)];
+
+            if tLayerPos(T, 1) > tLayerPos(S, 2)
+                tX = [tLayerPos(S, 1), tLayerPos(S, 2), tLayerPos(T, 1), tLayerPos(T, 2)];
+            else
+                tX = [tLayerPos(S, 2), tLayerPos(S, 1), tLayerPos(T, 2), tLayerPos(T, 1)];
+            end
+
             if abs(tX(1) - tX(3)) < eps
                 warning('Currently, flow between the same layer is not supported.');
             end
 
-            qX = linspace(tLayerPos(S, 2), tLayerPos(T, 1), obj.LinkGridSize(1));
+            qX = linspace(tX(2), tX(3), obj.LinkGridSize(1));
             qT = linspace(0, 1, obj.LinkGridSize(2));
 
             switch lower(obj.LinkType)
@@ -799,10 +806,10 @@ classdef SSankey < handle
                     qY1 = linspace(S1, T1, obj.LinkGridSize(1));
                     qY2 = linspace(S2, T2, obj.LinkGridSize(1));
                 case 'bezier'
-                    bX = [tLayerPos(S, 2); 
-                          (1 - obj.BezierRatio)*tLayerPos(S, 2) + obj.BezierRatio*tLayerPos(T, 1);
-                          obj.BezierRatio*tLayerPos(S, 2) + (1 - obj.BezierRatio)*tLayerPos(T, 1);
-                          tLayerPos(T, 1)];
+                    bX = [tX(2); 
+                          (1 - obj.BezierRatio)*tX(2) + obj.BezierRatio*tX(3);
+                          obj.BezierRatio*tX(2) + (1 - obj.BezierRatio)*tX(3);
+                          tX(3)];
                     bY1 = [S1; S1; T1; T1];
                     bY2 = [S2; S2; T2; T2];
                     bXY1 = obj.bezierCurve([bX, bY1], obj.LinkGridSize(1));
@@ -816,7 +823,7 @@ classdef SSankey < handle
 
             if strcmp(obj.Arrow, 'on')
                 YY(:, end) = (T1 + T2)./2;
-                XX(:, 1:(end - 1)) = (XX(:, 1:(end - 1)) - tLayerPos(S, 2)).*(1 - obj.ArrowHeadRatio) + tLayerPos(S, 2);
+                XX(:, 1:(end - 1)) = (XX(:, 1:(end - 1)) - tX(2)).*(1 - obj.ArrowHeadRatio) + tX(2);
             end
         end
 
