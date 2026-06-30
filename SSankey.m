@@ -313,7 +313,7 @@ classdef SSankey < handle
 % =========================================================================
 % Main drawing method (主绘图方法)
 % =========================================================================
-        function draw(obj)   
+        function [varargout] = draw(obj)   
 
             if obj.BezierRatio > 1, obj.BezierRatio = 1; end
             if obj.BezierRatio < 0, obj.BezierRatio = 0; end
@@ -361,6 +361,10 @@ classdef SSankey < handle
                 axis(obj.ax, 'tight');
             catch
             end
+
+            if nargout == 1
+                varargout = {obj};
+            end
         end
 
 
@@ -387,6 +391,18 @@ classdef SSankey < handle
 % =========================================================================
 % Dynamic node/link addition (动态添加节点/连接)
 % =========================================================================
+        function [varargout] = plus(obj, S)
+            if isnumeric(S)
+                obj.addLink(S(1), S(2), S(3))
+            else
+                obj.addNode(S{:})
+            end
+
+            if nargout == 1
+                varargout = {obj};
+            end
+        end
+        
         function addLink(obj, S, T, V)
             obj.getAdjMat()
             if isempty(obj.blockHdl)
@@ -456,9 +472,13 @@ classdef SSankey < handle
             if ~isempty(obj.blockHdl)
                 obj.getLayerPos()
                 obj.drawNode(length(obj.NodeList))
-                N = find(obj.Layer == obj.Layer(end));
-                for n = 1:length(N)
-                    obj.moveBlock(N(n))
+                % N = find(obj.Layer == obj.Layer(end));
+                % 
+                % for n = 1:length(N)
+                %     obj.moveBlock(N(n))
+                % end
+                for n = 1:length(obj.Layer)
+                    obj.moveBlock(n)
                 end
             end
         end

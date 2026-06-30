@@ -1,6 +1,6 @@
 %% sankey demo19 : Link type
 
-% figure('Name','sankey demo19', 'Units','normalized', 'Position',[.05,.2,.6,.6])
+figure('Name','sankey demo19', 'Units','normalized', 'Position',[.05,.2,.6,.6])
 
 layerNum = 5; 
 layerAdj = cell(1, layerNum - 1);
