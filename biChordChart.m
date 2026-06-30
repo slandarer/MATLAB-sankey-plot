@@ -141,9 +141,9 @@ classdef biChordChart < handle
         OriSquareRatio = 1                                     % Original square ratio (原始弧形块比例)
         Rotation = 0                                           % Global rotation angle (全局旋转角度)
         TickMode = 'value'                                     % Tick mode: 'value'/'auto'/'linear' (刻度模式)
-        linearTickSep                                          % Linear tick spacing (线性刻度间隔)
-        linearTickCompactDegree = 3.5                          % Linear tick compact degree (线性刻度紧密程度)
-        linearMinorTick = 'off'                                % Minor tick mode (次刻度线模式)
+        LinearTickSep                                          % Linear tick spacing (线性刻度间隔)
+        LinearTickCompactDegree = 3.5                          % Linear tick compact degree (线性刻度紧密程度)
+        LinearMinorTick = 'off'                                % Minor tick mode (次刻度线模式)
 
         % Graphics handles (图形句柄)
         squareHdl                                              % Blocks/squares (节点方块)
@@ -171,6 +171,10 @@ classdef biChordChart < handle
         LRotate    % LabelRotate
         SSqRatio   % SubSquareRatio
         OSqRatio   % OriSquareRatio
+
+        linearTickSep
+        linearTickCompactDegree
+        linearMinorTick
     end
 
     methods 
@@ -180,6 +184,10 @@ classdef biChordChart < handle
         function val = get.LRotate(obj),  val = obj.LabelRotate;    end
         function val = get.SSqRatio(obj), val = obj.SubSquareRatio; end
         function val = get.OSqRatio(obj), val = obj.OriSquareRatio; end
+
+        function val = get.linearTickSep(obj), val = obj.LinearTickSep; end
+        function val = get.linearTickCompactDegree(obj), val = obj.LinearTickCompactDegree; end
+        function val = get.linearMinorTick(obj), val = obj.LinearMinorTick; end
         
         function set.TRadius(obj, val),  obj.TickRadius = val;      end
         function set.SRadius(obj, val),  obj.SquareRadius = val;    end
@@ -187,6 +195,10 @@ classdef biChordChart < handle
         function set.LRotate(obj, val),  obj.LabelRotate = val;     end
         function set.SSqRatio(obj, val), obj.SubSquareRatio = val;  end
         function set.OSqRatio(obj, val), obj.OriSquareRatio = val;  end
+
+        function set.linearTickSep(obj, val), obj.LinearTickSep = val;  end
+        function set.linearTickCompactDegree(obj, val), obj.LinearTickCompactDegree = val;  end
+        function set.linearMinorTick(obj, val), obj.LinearMinorTick = val;  end
 
 % =========================================================================
 % Constructor (构造函数)
@@ -228,7 +240,7 @@ classdef biChordChart < handle
 % =========================================================================
 % Main drawing method (主绘图方法)
 % =========================================================================
-        function obj = draw(obj)
+        function varargout = draw(obj)
             % Validate gap parameters (验证间隙参数)
             if obj.Sep > 1/2, obj.Sep = 1/2; end
             if obj.GroupSep > 1/2, obj.GroupSep = 1/2; end
@@ -280,7 +292,7 @@ classdef biChordChart < handle
             ratioC = [0, ratioC];
 
             % # version 2.0.0 Linear tick spacing (线性刻度间隔)
-            obj.linearTickSep = obj.getTick(sum(sum(obj.dataMat))./(size(obj.dataMat, 1) + size(obj.dataMat, 2))*2, obj.linearTickCompactDegree);
+            obj.LinearTickSep = obj.getTick(sum(sum(obj.dataMat))./(size(obj.dataMat, 1) + size(obj.dataMat, 2))*2, obj.LinearTickCompactDegree);
 
             % # version 4.1.0 Separation lengths (分离长度)
             if groupNum == 0
@@ -483,14 +495,14 @@ classdef biChordChart < handle
                         tTFS = obj.thetaFullSet{i};
                         if ~isempty(tTFS)
                             totalFlow = sum(obj.dataMat(i, :)) + sum(obj.dataMat(:, i));
-                            obj.thetaFullSet{i} = (tTFS(end) - tTFS(1)) ./ totalFlow .* (0:obj.linearTickSep:totalFlow) + tTFS(1);
-                            tMTFS{i} = (tTFS(end) - tTFS(1)) ./ totalFlow .* (0:obj.linearTickSep/5:totalFlow) + tTFS(1);
+                            obj.thetaFullSet{i} = (tTFS(end) - tTFS(1)) ./ totalFlow .* (0:obj.LinearTickSep:totalFlow) + tTFS(1);
+                            tMTFS{i} = (tTFS(end) - tTFS(1)) ./ totalFlow .* (0:obj.LinearTickSep/5:totalFlow) + tTFS(1);
                         else
                             tMTFS{i} = [];
                         end
                     end
 
-                    if strcmp(obj.linearMinorTick, 'on')
+                    if strcmp(obj.LinearMinorTick, 'on')
                         tickX = [cos([tMTFS{:}]) .* obj.TickRadius, cos([obj.thetaFullSet{:}]) .* obj.TickRadius;
                                  cos([tMTFS{:}]) .* (obj.TickRadius + .01), cos([obj.thetaFullSet{:}]) .* (obj.TickRadius + .02);
                                  nan .* [[obj.thetaFullSet{:}], [tMTFS{:}]]];
@@ -510,7 +522,7 @@ classdef biChordChart < handle
             obj.thetaTickLabelHdl = gobjects(numC, max(cellfun(@length, obj.thetaFullSet)));
             for i = 1:numC
                 if strcmpi(obj.TickMode, 'linear')
-                    cumsumV = 0:obj.linearTickSep:(sum(obj.dataMat(i, :)) + sum(obj.dataMat(:, i)));
+                    cumsumV = 0:obj.LinearTickSep:(sum(obj.dataMat(i, :)) + sum(obj.dataMat(:, i)));
                 else
                     cumsumV = [0, cumsum([obj.dataMat(i, :), obj.dataMat(:, i)'])];
                     cumsumV = cumsumV(~isNANListF{i});
@@ -573,6 +585,10 @@ classdef biChordChart < handle
 
             % Apply label rotation (应用标签旋转)
             obj.labelRotate(obj.LabelRotate)
+
+            if nargout == 1
+                varargout{1} = obj;
+            end
         end
 
 
@@ -792,10 +808,6 @@ classdef biChordChart < handle
             end
         end
     end
-end
-
-
-% =========================================================================
 % @author : slandarer
 % 公众号  : slandarer随笔
 % 知乎    : slandarer
@@ -803,4 +815,4 @@ end
 % Zhaoxu Liu / slandarer (2026). biChordChart (bidirectional chord diagram | 有向弦图) 
 % (https://www.mathworks.com/matlabcentral/fileexchange/121043-bichordchart-bidirectional-chord-diagram), 
 % MATLAB Central File Exchange. Retrieved April 14, 2026.
-% =========================================================================
+end

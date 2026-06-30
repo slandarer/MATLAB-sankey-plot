@@ -313,7 +313,7 @@ classdef SSankey < handle
 % =========================================================================
 % Main drawing method (主绘图方法)
 % =========================================================================
-        function [varargout] = draw(obj)   
+        function varargout = draw(obj)   
 
             if obj.BezierRatio > 1, obj.BezierRatio = 1; end
             if obj.BezierRatio < 0, obj.BezierRatio = 0; end
@@ -391,7 +391,7 @@ classdef SSankey < handle
 % =========================================================================
 % Dynamic node/link addition (动态添加节点/连接)
 % =========================================================================
-        function [varargout] = plus(obj, S)
+        function varargout = plus(obj, S)
             if isnumeric(S)
                 obj.addLink(S(1), S(2), S(3))
             else
@@ -457,6 +457,9 @@ classdef SSankey < handle
                 end
             end
             obj.LN = max(obj.Layer);
+            if (~ischar(obj.LabelLocation)) && (~isstring(obj.LabelLocation))
+                obj.LabelLocation{end + 1} = obj.LabelLocation{end};
+            end
             
             % Add default color and position (添加默认颜色和位置)
             obj.ColorList(end + 1, :) = rand(1, 3) * 0.7;
@@ -477,9 +480,10 @@ classdef SSankey < handle
                 % for n = 1:length(N)
                 %     obj.moveBlock(N(n))
                 % end
-                for n = 1:length(obj.Layer)
-                    obj.moveBlock(n)
-                end
+                obj.refresh()
+                % for n = 1:length(obj.Layer)
+                %     obj.moveBlock(n)
+                % end
             end
         end
 
@@ -495,7 +499,7 @@ classdef SSankey < handle
             obj.VN = sum(sum(obj.BoolMat));
             
             % Prepare label locations (准备标签位置)
-            if ischar(obj.LabelLocation)
+            if ischar(obj.LabelLocation)||isstring(obj.LabelLocation)
                 tLabelLocation = repmat({obj.LabelLocation}, 1, obj.BN);
             else
                 tLabelLocation = obj.LabelLocation;
@@ -556,7 +560,7 @@ classdef SSankey < handle
 % =========================================================================
 % Link drawing (连接绘制)
 % =========================================================================
-    function drawLink(obj, n, init)
+        function drawLink(obj, n, ~)
             [obj.SourceInd, obj.TargetInd] = find(obj.AdjMat ~= 0);
             tSource = obj.SourceInd(n);
             tTarget = obj.TargetInd(n);
@@ -587,7 +591,7 @@ classdef SSankey < handle
                     MeshC(:, :, 2) = repmat(linspace(obj.ColorList(tSource, 2), obj.ColorList(tTarget, 2), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
                     MeshC(:, :, 3) = repmat(linspace(obj.ColorList(tSource, 3), obj.ColorList(tTarget, 3), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
                 case 'map'
-                    MeshC = MeshC(:, :, 1) .* obj.Value{n};
+                    MeshC = MeshC(:, :, 1) .* obj.AdjMat(tSource, tTarget);
                 case 'simple'
                     MeshC(:, :, 1) = MeshC(:, :, 1) .* 0.6;
                     MeshC(:, :, 2) = MeshC(:, :, 2) .* 0.6;
@@ -942,6 +946,40 @@ classdef SSankey < handle
                     src.FaceAlpha = 0.3;
                 end
             end
+        end
+
+        function setLinkRenderingMethod(obj, layer, method)
+
+            [obj.SourceInd, obj.TargetInd] = find(obj.AdjMat ~= 0);
+            N = find(obj.Layer(obj.SourceInd) == layer);
+
+            for n = 1:length(N)
+                tSource = obj.SourceInd(N(n));
+                tTarget = obj.TargetInd(N(n));
+                MeshC = ones(obj.LinkGridSize(2), obj.LinkGridSize(1), 3);
+                switch method
+                    case 'left'
+                        MeshC(:, :, 1) = MeshC(:, :, 1) .* obj.ColorList(tSource, 1);
+                        MeshC(:, :, 2) = MeshC(:, :, 2) .* obj.ColorList(tSource, 2);
+                        MeshC(:, :, 3) = MeshC(:, :, 3) .* obj.ColorList(tSource, 3);
+                    case 'right'
+                        MeshC(:, :, 1) = MeshC(:, :, 1) .* obj.ColorList(tTarget, 1);
+                        MeshC(:, :, 2) = MeshC(:, :, 2) .* obj.ColorList(tTarget, 2);
+                        MeshC(:, :, 3) = MeshC(:, :, 3) .* obj.ColorList(tTarget, 3);
+                    case 'interp'
+                        MeshC(:, :, 1) = repmat(linspace(obj.ColorList(tSource, 1), obj.ColorList(tTarget, 1), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
+                        MeshC(:, :, 2) = repmat(linspace(obj.ColorList(tSource, 2), obj.ColorList(tTarget, 2), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
+                        MeshC(:, :, 3) = repmat(linspace(obj.ColorList(tSource, 3), obj.ColorList(tTarget, 3), obj.LinkGridSize(1)), [obj.LinkGridSize(2), 1]);
+                    case 'map'
+                        MeshC = MeshC(:, :, 1) .* obj.AdjMat(tSource, tTarget);
+                    case 'simple'
+                        MeshC(:, :, 1) = MeshC(:, :, 1) .* 0.6;
+                        MeshC(:, :, 2) = MeshC(:, :, 2) .* 0.6;
+                        MeshC(:, :, 3) = MeshC(:, :, 3) .* 0.6;
+                end
+                set(obj.LinkHdl(N(n)), 'CData', MeshC);
+            end
+
         end
         
         function setLabelLocation(obj, layer, location)

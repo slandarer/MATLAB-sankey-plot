@@ -18,7 +18,7 @@ SK.draw();close all
 DIFFV = sum(SK.AdjMat,1).'-sum(SK.AdjMat,2);
 DIFFV(DIFFV<0 | sum(SK.AdjMat,2)==0) = 0;
 
-figure('Name','sankey demo6','Units','normalized','Position',[.05,.05,.59,.8])
+figure('Name','sankey demo6_2','Units','normalized','Position',[.05,.05,.59,.8])
 
 % 【更新部分 3】弦图输入邻接矩阵变为SK.AdjMat+diag(DIFFV)
 % 【Update  3】The input adjacency matrix of the chord diagram becomes SK.AdjMat+diag(DIFFV)

@@ -25,14 +25,16 @@ SK.LabelLocation='top';
 % Set separation distance proportion (设置缝隙占比)
 SK.Sep=.2;
 
+SK.ValueLabelLocation = 'left';
+
 % Start drawing (开始绘图)
 SK.draw()
+
 
 SK.dataTipFormat = {1, 'Source:', 'Target:', 'Value:', 'auto'};
 
 % Set text location for the first layer to the left (将第一层标签调整到左侧)
 SK.setLabelLocation(1, 'left')
-
 
 
 

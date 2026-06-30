@@ -1,7 +1,7 @@
 %% sankey demo4 : Examples of inflow not equaling outflow, and cross‑level flow examples.
 
 
-figure('Name','sankey demo4_1','Units','normalized','Position',[.05,.2,.5,.56])
+figure('Name','sankey demo4-1','Units','normalized','Position',[.05,.2,.5,.56])
 
 % Unequal inflow and outflow data (流入及流出数据不相等)
 links={'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
@@ -17,7 +17,7 @@ SK=SSankey(links(:,1),links(:,2),links(:,3));
 SK.draw();
 
 %%
-figure('Name','sankey demo4_2','Units','normalized','Position',[.05,.2,.5,.56])
+figure('Name','sankey demo4-2','Units','normalized','Position',[.05,.2,.5,.56])
 
 % Including cross level flow (含跨层级流动)
 links={'a1','A',1.2;'a2','A',2;'a1','B',.6;'a3','D',1; 'a3','C',0.5;

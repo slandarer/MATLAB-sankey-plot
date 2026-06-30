@@ -1,6 +1,6 @@
 %% sankey demo5 : Set block/link/label
 
-figure('Name','sankey demo1','Units','normalized','Position',[.05,.2,.5,.56])
+figure('Name','sankey demo5','Units','normalized','Position',[.05,.2,.5,.56])
 
 links={'a1','A',1.2;'a2','A',1;'a1','B',.6;'a3','A',1; 'a3','C',0.5;
        'b1','B',.4; 'b2','B',1;'b3','B',1; 'c1','C',1;

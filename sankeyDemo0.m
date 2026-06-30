@@ -1,7 +1,7 @@
 %% sankey demo0 : Basic uasge - equivalent code
 
 %% Basic usage - links
-figure()
+figure('Name','sankey demo0-1','Units','normalized','Position',[.05,.2,.5,.56])
 % Define links
 links={'a', 'A', 3; 'a', 'B', 1; 'a', 'C', 1; 
        'b', 'A', 1; 'b', 'B', 5;
@@ -22,7 +22,7 @@ SK1.draw()
 
 
 %% Basic usage - adjMat
-figure()
+figure('Name','sankey demo0-2','Units','normalized','Position',[.05,.2,.5,.56])
 % Define inter-layer adjacency matrices (定义层间邻接矩阵)
 A12 = [3,1,1; 1,5,0; 0,2,4];   % a,b,c -> A,B,C
 A23 = [4,0,1; 0,5,3; 5,0,0];   % A,B,C -> AA,BB,CC
